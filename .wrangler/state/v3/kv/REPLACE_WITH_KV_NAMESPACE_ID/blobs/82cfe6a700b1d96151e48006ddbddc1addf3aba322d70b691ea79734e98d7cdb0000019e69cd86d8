@@ -1,0 +1,1 @@
+{"echo.enabled":{"enabled":true,"rolloutPercentage":100,"scope":"tool:echo","rules":{}},"flow.enabled":{"enabled":true,"rolloutPercentage":100,"scope":"tool:flow","rules":{}},"signup.enabled":{"enabled":true,"rolloutPercentage":100,"scope":"auth","rules":{}}}
