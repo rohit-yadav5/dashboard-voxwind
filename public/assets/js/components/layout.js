@@ -1,5 +1,5 @@
 import { currentPath, navigate } from "../core/router.js";
-import { session, setMockRole } from "../core/state.js";
+import { session } from "../core/state.js";
 import { getEnvironment, setEnvironment } from "../services/admin-api.js";
 
 const nav = [

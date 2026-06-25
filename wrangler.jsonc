@@ -1,68 +1,96 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "dashboard-voxwind",
-  "main": "src/worker/index.js",
-  "compatibility_date": "2026-05-26",
-  "compatibility_flags": ["nodejs_compat"],
-
-  "observability": {
-    "enabled": true
-  },
-
-  "assets": {
-    "directory": "public",
-    "binding": "ASSETS",
-    "not_found_handling": "single-page-application"
-  },
-
-  "vars": {
-    "APP_ENV": "development",
-    "DASHBOARD_ORIGIN": "https://dashboard.voxwind.com",
-    "AUTH_ORIGIN": "https://auth.voxwind.com",
-    "PUBLIC_CONFIG_CACHE_TTL": "300"
-  },
-
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "voxwind-dashboard-db",
-      "database_id": "REPLACE_WITH_REAL_D1_DATABASE_ID"
-    }
-  ],
-
-  "kv_namespaces": [
-    {
-      "binding": "CONFIG_CACHE",
-      "id": "REPLACE_WITH_REAL_KV_NAMESPACE_ID"
-    },
-    {
-      "binding": "RATE_LIMIT",
-      "id": "REPLACE_WITH_RATE_LIMIT_KV_NAMESPACE_ID"
-    }
-  ],
-
-  "r2_buckets": [
-    {
-      "binding": "MEDIA_BUCKET",
-      "bucket_name": "dashboard-media"
-    },
-    {
-      "binding": "AUDIT_ARCHIVE_BUCKET",
-      "bucket_name": "dashboard-audit-archive"
-    }
-  ],
-
-  "env": {
-    "staging": {
-      "vars": {
-        "APP_ENV": "staging"
-      }
-    },
-
-    "production": {
-      "vars": {
-        "APP_ENV": "production"
-      }
-    }
-  }
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "dashboard-voxwind",
+	"main": "src/worker/index.js",
+	"compatibility_date": "2026-05-26",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"observability": {
+		"enabled": true
+	},
+	"assets": {
+		"directory": "public",
+		"binding": "ASSETS",
+		"not_found_handling": "single-page-application"
+	},
+	"vars": {
+		"APP_ENV": "development",
+		"DASHBOARD_ORIGIN": "https://dashboard.voxwind.com",
+		"AUTH_ORIGIN": "https://auth.voxwind.com",
+		"PUBLIC_CONFIG_CACHE_TTL": "300"
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "voxwind-dashboard-db",
+			"database_id": "13b47420-9436-4564-80b6-3e153907ea4b"
+		}
+	],
+	"kv_namespaces": [
+		{
+			"binding": "CONFIG_CACHE",
+			"id": "ac9688031f6f434f91a02f3eca955018",
+			"remote": true
+		},
+		{
+			"binding": "RATE_LIMIT",
+			"id": "545be6335df74eae9c78fdfa3c49f294",
+			"remote": true
+		}
+	],
+	"r2_buckets": [
+		{
+			"binding": "MEDIA_BUCKET",
+			"bucket_name": "dashboard-media"
+		},
+		{
+			"binding": "AUDIT_ARCHIVE_BUCKET",
+			"bucket_name": "dashboard-audit-archive"
+		}
+	],
+	"env": {
+		"staging": {
+			"vars": {
+				"APP_ENV": "staging"
+			}
+		},
+		"production": {
+			"vars": {
+				"APP_ENV": "production",
+				"DASHBOARD_ORIGIN": "https://dashboard.voxwind.com",
+				"AUTH_ORIGIN": "https://auth.voxwind.com",
+				"PUBLIC_CONFIG_CACHE_TTL": "300"
+			},
+			"d1_databases": [
+				{
+					"binding": "DB",
+					"database_name": "voxwind-dashboard-db",
+					"database_id": "13b47420-9436-4564-80b6-3e153907ea4b"
+				}
+			],
+			"kv_namespaces": [
+				{
+					"binding": "CONFIG_CACHE",
+					"id": "ac9688031f6f434f91a02f3eca955018",
+					"remote": true
+				},
+				{
+					"binding": "RATE_LIMIT",
+					"id": "545be6335df74eae9c78fdfa3c49f294",
+					"remote": true
+				}
+			],
+			"r2_buckets": [
+				{
+					"binding": "MEDIA_BUCKET",
+					"bucket_name": "dashboard-media"
+				},
+				{
+					"binding": "AUDIT_ARCHIVE_BUCKET",
+					"bucket_name": "dashboard-audit-archive"
+				}
+			]
+		}
+	}
 }

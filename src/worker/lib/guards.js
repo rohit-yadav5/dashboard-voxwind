@@ -1,3 +1,5 @@
+import { getUserContext } from "../services/permissions.js";
+
 const ADMIN_ROLES = new Set(["owner", "admin", "editor", "support"]);
 
 export async function requireAdmin(request, env) {
@@ -17,7 +19,12 @@ export async function requireAdmin(request, env) {
       return { ok: false, status: 401, error: "Unauthorized" };
     }
     const data = await res.json();
-    authUser = data;
+
+    if (!data.user) {
+      return { ok: false, status: 401, error: "Unauthorized" };
+    }
+
+    authUser = data.user;
   } catch (err) {
     console.error("Auth service verification failed", err);
     return { ok: false, status: 500, error: "Authentication service connection failed" };
@@ -27,44 +34,38 @@ export async function requireAdmin(request, env) {
     return { ok: false, status: 401, error: "Unauthorized" };
   }
 
-  // 2. Query the user's role from the local dashboard database
-  let userRole;
+  // 2. Query the user's context (role & permissions) from D1
+  let userContext;
   try {
-    userRole = await env.DB.prepare(
-      `SELECT r.name FROM user_roles ur
-       JOIN roles r ON ur.role_id = r.id
-       WHERE ur.user_id = ?`
-    ).bind(authUser.id).first();
+    userContext = await getUserContext(env.DB, authUser.id);
   } catch (err) {
-    console.error("D1 role lookup failed", err);
+    console.error("getUserContext failed", err);
     return { ok: false, status: 500, error: "Database error during authorization check" };
   }
 
-  if (!userRole || !userRole.name) {
+  if (!userContext || !userContext.roles || !userContext.roles.length) {
+    return { ok: false, status: 403, error: "Admin role required" };
+  }
+
+  const primaryRole = userContext.roles[0];
+  if (!ADMIN_ROLES.has(primaryRole)) {
     return { ok: false, status: 403, error: "Admin role required" };
   }
 
   const user = {
-    id: authUser.id,
-    email: authUser.email,
-    displayName: authUser.display_name || authUser.email.split("@")[0],
-    role: userRole.name
+    id: userContext.user.id,
+    email: userContext.user.email,
+    displayName: userContext.user.displayName || userContext.user.email.split("@")[0],
+    role: primaryRole,
+    permissions: userContext.permissions
   };
-
-  if (!ADMIN_ROLES.has(user.role)) {
-    return { ok: false, status: 403, error: "Admin role required" };
-  }
 
   return { ok: true, user };
 }
 
 export function can(user, permission) {
   if (user.role === "owner") return true;
-  const byRole = {
-    admin: ["tools:write", "content:write", "flags:write", "analytics:read"],
-    editor: ["tools:read", "content:write", "seo:write"],
-    support: ["users:read", "analytics:read"]
-  };
-  return (byRole[user.role] || []).includes(permission);
+  return (user.permissions || []).includes(permission);
 }
+
 
