@@ -22,7 +22,9 @@ This project remains isolated from the existing VoxWind apps. It does not modify
 - Environment-aware data model: `development`, `staging`, `production`.
 - Soft-delete/archive architecture.
 - R2-ready media upload intent route.
-- Users and analytics remain mocked for now.
+- Admin authentication integrated with `auth.voxwind.com`.
+- Role and permissions resolution backed by D1.
+- Dashboard analytics display fallback demo content.
 
 ## Routes
 
@@ -173,7 +175,7 @@ This prevents development/staging records from leaking into production config.
 `wrangler.jsonc` prepares:
 
 - `ASSETS`: static dashboard frontend.
-- `DB`: D1 database `voxwind-admin`.
+- `DB`: D1 database `voxwind-dashboard-db`.
 - `CONFIG_CACHE`: KV namespace for published runtime config.
 - `RATE_LIMIT`: KV namespace reserved for admin API limits.
 - `MEDIA_BUCKET`: R2 bucket reserved for future media assets.
@@ -190,15 +192,15 @@ npm run deploy
 
 ## Current Auth Mode
 
-The Worker still uses a mock owner identity in `src/worker/lib/guards.js`.
-
-Production auth integration is intentionally deferred. The next auth phase should validate the existing `vw_session` cookie and load dashboard roles from D1 or the future shared auth/admin model.
+The Worker validates incoming requests using the `vw_session` cookie against `auth.voxwind.com`.
+Once authenticated, the user's roles and permissions are dynamically resolved from the local D1 database.
+All routing and modifications enforce granular permission checks.
 
 ## Next Recommended Work
 
-1. Replace mock admin guard with real `vw_session` validation.
-2. Add frontend editing forms for feature flags, announcements, and homepage sections.
-3. Add audit log viewer.
-4. Implement rollback endpoint using `config_versions.snapshot_json`.
-5. Implement real R2 signed upload URLs and media metadata persistence.
+1. Add frontend editing forms for feature flags, announcements, and homepage sections.
+2. Add audit log viewer.
+3. Implement rollback endpoint using `config_versions.snapshot_json`.
+4. Implement real R2 signed upload URLs and media metadata persistence.
+5. Implement frontend route guards and automatic session-aware redirects.
 6. Only after the model stabilizes, integrate public config into `voxwind.com`.

@@ -79,7 +79,7 @@ Files:
 
 - `public/assets/js/pages/tools.js`
 - `public/assets/js/pages/add-tool.js`
-- `public/assets/js/services/mock-data.js`
+- `public/assets/js/services/sample-data.js`
 - `public/assets/js/services/admin-api.js`
 
 Tool records are modeled to support:
@@ -107,7 +107,7 @@ Created mock services so the UI can function before D1/API integration.
 
 Files:
 
-- `public/assets/js/services/mock-data.js`
+- `public/assets/js/services/sample-data.js`
 - `public/assets/js/services/admin-api.js`
 
 Mock data currently covers:

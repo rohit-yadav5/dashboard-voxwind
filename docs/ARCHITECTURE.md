@@ -57,10 +57,10 @@ public/assets/js/
 │   └── tools.js
 └── services/
     ├── admin-api.js
-    └── mock-data.js
+    └── demo-data.js
 ```
 
-The frontend uses real Worker APIs for tools, feature flags, announcements, homepage sections, and config publishing. Users and analytics remain mocked.
+The frontend uses real Worker APIs for tools, feature flags, announcements, homepage sections, and config publishing. Dashboard analytics display fallback demo content.
 
 ## Worker Structure
 
@@ -98,6 +98,16 @@ src/worker/
     ├── simple-records.js
     └── tool.js
 ```
+
+## Authentication & Authorization Flow
+
+Authentication and authorization are completely database-driven and decoupled from local dashboard mock states:
+
+1. **Browser**: Admin accesses the dashboard with a valid `vw_session` cookie.
+2. **Worker Guards**: Intercepts requests and validates the session against the central `auth.voxwind.com` identity provider.
+3. **Identity Resolution**: User ID is resolved from the core authentication response.
+4. **D1 Role Lookup**: The Worker queries the local D1 database (`user_roles`, `roles`, `role_permissions`, `permissions`) to retrieve the user's granular capabilities.
+5. **Session Endpoint**: The `/api/admin/session` endpoint serves the unified profile and dynamic capabilities list to the frontend UI, powering granular UI controls.
 
 ## D1 Schema
 
@@ -201,7 +211,7 @@ Every admin mutation writes an `audit_logs` entry with:
 - user agent
 - timestamp
 
-Current actor identity is mocked until production auth integration.
+Current actor identity is dynamically resolved from the `auth.voxwind.com` session, and permissions are enforced via D1 role lookup.
 
 ## Rollback Strategy
 

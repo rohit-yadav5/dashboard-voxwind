@@ -7,10 +7,10 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "db:migrate:local": "wrangler d1 execute voxwind-admin --local --file=migrations/0001_admin_core.sql",
-    "db:seed:local": "wrangler d1 execute voxwind-admin --local --file=seeds/0001_foundation.sql",
-    "db:migrate:remote": "wrangler d1 execute voxwind-admin --remote --file=migrations/0001_admin_core.sql",
-    "db:seed:remote": "wrangler d1 execute voxwind-admin --remote --file=seeds/0001_foundation.sql",
+    "db:migrate:local": "wrangler d1 execute voxwind-dashboard-db --local --file=migrations/0001_admin_core.sql",
+    "db:seed:local": "wrangler d1 execute voxwind-dashboard-db --local --file=seeds/0001_foundation.sql",
+    "db:migrate:remote": "wrangler d1 execute voxwind-dashboard-db --remote --file=migrations/0001_admin_core.sql",
+    "db:seed:remote": "wrangler d1 execute voxwind-dashboard-db --remote --file=seeds/0001_foundation.sql",
     "check": "node --check src/worker/index.js && find public/assets/js src/worker -name '*.js' -print0 | xargs -0 -n1 node --check"
   },
   "devDependencies": {

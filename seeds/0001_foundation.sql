@@ -5,12 +5,6 @@ INSERT OR IGNORE INTO roles (id, name, description, created_at) VALUES
   ('role_support', 'support', 'Support and analytics access', unixepoch()),
   ('role_normal_user', 'normal_user', 'No dashboard access', unixepoch());
 
-INSERT OR IGNORE INTO users (id, email, display_name, status, created_at, updated_at) VALUES
-  ('usr_mock_owner', 'owner@voxwind.com', 'VoxWind Owner', 'active', unixepoch(), unixepoch());
-
-INSERT OR IGNORE INTO user_roles (user_id, role_id, assigned_by, assigned_at) VALUES
-  ('usr_mock_owner', 'role_owner', 'system', unixepoch());
-
 INSERT OR IGNORE INTO tools (
   id, name, slug, description, icon, category, lifecycle_state, status, visibility,
   homepage_visibility, featured, order_index, public_url, api_endpoints_json,

@@ -9,6 +9,8 @@
 	"observability": {
 		"enabled": true
 	},
+	"workers_dev": false,
+	"preview_urls": false,
 	"assets": {
 		"directory": "public",
 		"binding": "ASSETS",
@@ -30,13 +32,11 @@
 	"kv_namespaces": [
 		{
 			"binding": "CONFIG_CACHE",
-			"id": "ac9688031f6f434f91a02f3eca955018",
-			"remote": true
+			"id": "ac9688031f6f434f91a02f3eca955018"
 		},
 		{
 			"binding": "RATE_LIMIT",
-			"id": "545be6335df74eae9c78fdfa3c49f294",
-			"remote": true
+			"id": "545be6335df74eae9c78fdfa3c49f294"
 		}
 	],
 	"r2_buckets": [
@@ -52,7 +52,10 @@
 	"env": {
 		"staging": {
 			"vars": {
-				"APP_ENV": "staging"
+				"APP_ENV": "staging",
+				"DASHBOARD_ORIGIN": "https://dashboard-staging.voxwind.com",
+				"AUTH_ORIGIN": "https://auth.voxwind.com",
+				"PUBLIC_CONFIG_CACHE_TTL": "300"
 			}
 		},
 		"production": {
@@ -61,36 +64,7 @@
 				"DASHBOARD_ORIGIN": "https://dashboard.voxwind.com",
 				"AUTH_ORIGIN": "https://auth.voxwind.com",
 				"PUBLIC_CONFIG_CACHE_TTL": "300"
-			},
-			"d1_databases": [
-				{
-					"binding": "DB",
-					"database_name": "voxwind-dashboard-db",
-					"database_id": "13b47420-9436-4564-80b6-3e153907ea4b"
-				}
-			],
-			"kv_namespaces": [
-				{
-					"binding": "CONFIG_CACHE",
-					"id": "ac9688031f6f434f91a02f3eca955018",
-					"remote": true
-				},
-				{
-					"binding": "RATE_LIMIT",
-					"id": "545be6335df74eae9c78fdfa3c49f294",
-					"remote": true
-				}
-			],
-			"r2_buckets": [
-				{
-					"binding": "MEDIA_BUCKET",
-					"bucket_name": "dashboard-media"
-				},
-				{
-					"binding": "AUDIT_ARCHIVE_BUCKET",
-					"bucket_name": "dashboard-audit-archive"
-				}
-			]
+			}
 		}
 	}
 }

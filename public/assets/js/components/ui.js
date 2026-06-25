@@ -54,7 +54,7 @@ export function forbidden() {
   return `
     <div class="empty-state">
       <h2 style="margin-top:0">Permission required</h2>
-      <p>This mock role cannot access this route. Change the role selector in the topbar to preview role behavior.</p>
+      <p>This role does not have permission to access this route.</p>
     </div>
   `;
 }

@@ -6,7 +6,7 @@ import {
   seoPages,
   tools as mockTools,
   users
-} from "./mock-data.js";
+} from "./demo-data.js";
 
 const API_BASE = "";
 let environment = localStorage.getItem("vw_dashboard_env") || "production";
