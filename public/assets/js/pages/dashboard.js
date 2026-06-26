@@ -1,50 +1,77 @@
-import { appLayout, bindLayout } from "../components/layout.js";
-import { chart, metric, pageHead, section } from "../components/ui.js";
-import { getAnalytics, listTools } from "../services/admin-api.js";
+import { getIcon } from "../core/icons.js";
+import { session } from "../core/state.js";
+import { getEnvironment } from "../services/admin-api.js";
 
 export function dashboardPage() {
   return {
     render: async () => {
-      const data = await getAnalytics();
-      const tools = await listTools();
-      const recentTools = tools.slice(0, 3).map((tool) => `
-        <tr>
-          <td><div class="tool-cell"><span class="tool-icon">${tool.icon}</span><strong>${tool.name}</strong></div></td>
-          <td>${tool.category}</td>
-          <td><span class="badge ${tool.status}">${tool.status}</span></td>
-          <td>${tool.featured ? "Featured" : "Standard"}</td>
-        </tr>
-      `).join("");
-      return appLayout(`
-        ${pageHead("Dashboard", "Central operating surface for tools, content, settings, and publishing.", `
-          <a class="btn btn-primary" href="/dashboard/tools/add" data-route>Add tool</a>
-        `)}
-        <div class="grid grid-4">
-          ${metric("Total users", data.totals.users.toLocaleString(), "Mock auth population")}
-          ${metric("Tool usage", data.totals.toolUsage.toLocaleString(), "Across registered tools")}
-          ${metric("API requests", data.totals.apiRequests.toLocaleString(), "Last 30 days")}
-          ${metric("Active tools", data.totals.activeTools, "Public or beta")}
+      const user = session.user;
+      const userName = user ? (user.displayName || user.email) : "Developer";
+      const userRole = user ? user.role : "Guest";
+      const env = getEnvironment();
+
+      return `
+        <div class="vw-page-header">
+          <div>
+            <h1 class="vw-h1">Welcome back, ${userName}</h1>
+            <p class="vw-text-muted" style="margin-top: 8px;">
+              You are signed in as <strong>${userRole}</strong> in the <strong>${env}</strong> environment.
+            </p>
+          </div>
+          <div class="vw-page-actions">
+            <button class="vw-btn vw-btn-primary" onclick="document.dispatchEvent(new KeyboardEvent('keydown', {key: 'k', metaKey: true}))">
+              ${getIcon("Command")} Command Palette
+            </button>
+          </div>
         </div>
-        <div class="grid grid-2" style="margin-top:16px">
-          ${section("Growth", "Placeholder event trend for the future analytics pipeline.", chart(data.growth))}
-          ${section("Recent events", "Mock audit and publishing activity.", `
-            <div class="timeline">
-              ${data.events.map((event) => `<div class="timeline-item"><span class="timeline-dot"></span><div>${event}<br><span class="muted small">Just now</span></div></div>`).join("")}
+
+        <div style="margin-bottom: var(--vw-space-4);">
+          <h2 class="vw-h3" style="margin-bottom: var(--vw-space-3);">Infrastructure Overview</h2>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--vw-space-4);">
+            <div class="vw-metric-card">
+              <div class="vw-metric-label">Active Sites</div>
+              <div class="vw-metric-value">0</div>
             </div>
-          `)}
-        </div>
-        <div style="margin-top:16px">
-          ${section("Tool registry preview", "Future website/tool config source of truth.", `
-            <div class="table-wrap">
-              <table class="table">
-                <thead><tr><th>Tool</th><th>Category</th><th>Status</th><th>Placement</th></tr></thead>
-                <tbody>${recentTools}</tbody>
-              </table>
+            <div class="vw-metric-card">
+              <div class="vw-metric-label">Cloudflare Workers</div>
+              <div class="vw-metric-value">0</div>
             </div>
-          `)}
+            <div class="vw-metric-card">
+              <div class="vw-metric-label">D1 Databases</div>
+              <div class="vw-metric-value">1</div>
+            </div>
+            <div class="vw-metric-card">
+              <div class="vw-metric-label">KV Namespaces</div>
+              <div class="vw-metric-value">1</div>
+            </div>
+          </div>
         </div>
-      `);
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--vw-space-4);">
+          <div class="vw-card">
+            <h2 class="vw-h3" style="margin-bottom: var(--vw-space-4);">Quick Actions</h2>
+            <div style="display: grid; gap: var(--vw-space-2);">
+              <a href="/dashboard/sites" data-route class="vw-btn vw-btn-secondary" style="justify-content: flex-start;">
+                ${getIcon("Sites")} View Sites
+              </a>
+              <a href="/dashboard/users" data-route class="vw-btn vw-btn-secondary" style="justify-content: flex-start;">
+                ${getIcon("Users")} Manage Users
+              </a>
+              <a href="/dashboard/settings" data-route class="vw-btn vw-btn-secondary" style="justify-content: flex-start;">
+                ${getIcon("Settings")} Platform Settings
+              </a>
+            </div>
+          </div>
+          
+          <div class="vw-card">
+            <h2 class="vw-h3" style="margin-bottom: var(--vw-space-4);">Recent Activity</h2>
+            <div class="vw-empty" style="padding: var(--vw-space-4); border: none; background: var(--vw-bg); min-height: 140px;">
+              <p class="vw-text-muted">No recent activity found in this environment.</p>
+            </div>
+          </div>
+        </div>
+      `;
     },
-    afterRender: bindLayout
+    afterRender: () => {}
   };
 }

@@ -52,7 +52,11 @@ export const tools = [
   }
 ];
 
-export const users = [];
+export const users = [
+  { id: "usr_1", name: "Rohit Yadav", email: "rohit@voxwind.com", role: "owner", status: "active", createdAt: "May 1, 2026" },
+  { id: "usr_2", name: "Jane Doe", email: "jane@voxwind.com", role: "admin", status: "active", createdAt: "May 10, 2026" },
+  { id: "usr_3", name: "Alice Smith", email: "alice@voxwind.com", role: "editor", status: "active", createdAt: "Jun 15, 2026" }
+];
 
 export const featureFlags = [
   { key: "echo.enabled", description: "Echo public access", enabled: true, scope: "tool:echo" },

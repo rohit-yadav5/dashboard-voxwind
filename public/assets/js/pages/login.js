@@ -1,3 +1,5 @@
+import { Button } from "../components/ui.js";
+
 export function loginPage() {
   return {
     render: () => {
@@ -9,9 +11,12 @@ export function loginPage() {
             <div class="brand-mark">V</div>
             <h1>Dashboard sign in</h1>
             <p>Admin authentication is unified. Please sign in via the VoxWind account gateway.</p>
-            <a class="btn btn-primary" href="${ssoUrl}" style="width:100%;margin-top:20px;text-align:center;text-decoration:none;display:inline-block;line-height:40px">
-              Sign in with VoxWind SSO
-            </a>
+            ${Button({
+              label: "Sign in with VoxWind SSO",
+              href: ssoUrl,
+              variant: "primary",
+              extraAttrs: 'style="width: 100%; justify-content: center; min-height: 40px; font-size: 14px;"'
+            })}
           </section>
         </main>
       `;

@@ -1,0 +1,75 @@
+/* ============================================
+   VOXWIND CONSOLE DESIGN SYSTEM
+   ============================================ */
+
+:root {
+  color-scheme: dark;
+
+  /* Typography */
+  --vw-font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  
+  /* Colors: Surfaces (Dark Theme aligned with VoxWind) */
+  --vw-bg: #000000;
+  --vw-surface: #111111;
+  --vw-surface-hover: #1a1a1a;
+  --vw-surface-active: #222222;
+  
+  /* Colors: Borders */
+  --vw-border: #2a2a2a;
+  --vw-border-hover: #444444;
+
+  /* Colors: Text */
+  --vw-text: #ffffff;
+  --vw-text-muted: #888888;
+  --vw-text-subtle: #555555;
+  
+  /* Colors: Accents & Status */
+  --vw-accent: #ffffff;
+  --vw-accent-text: #000000;
+  --vw-danger: #ff453a;
+  --vw-danger-bg: rgba(255, 69, 58, 0.15);
+  --vw-success: #32d74b;
+  --vw-success-bg: rgba(50, 215, 75, 0.15);
+  --vw-warning: #ffd60a;
+  --vw-warning-bg: rgba(255, 214, 10, 0.15);
+  --vw-info: #0a84ff;
+  --vw-info-bg: rgba(10, 132, 255, 0.15);
+
+  /* Radiuses (Matching VoxWind main site) */
+  --vw-radius-sm: 6px;
+  --vw-radius-md: 8px;
+  --vw-radius-lg: 12px;
+  --vw-radius-full: 9999px;
+
+  /* Spacing */
+  --vw-space-1: 4px;
+  --vw-space-2: 8px;
+  --vw-space-3: 12px;
+  --vw-space-4: 16px;
+  --vw-space-5: 24px;
+  --vw-space-6: 32px;
+  --vw-space-8: 48px;
+  --vw-space-12: 72px;
+
+  /* Shadows & Elevation */
+  --vw-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.8);
+  --vw-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.6);
+  --vw-shadow-lg: 0 18px 60px rgba(0, 0, 0, 0.7);
+
+  /* Animation & Transitions */
+  --vw-transition-fast: 0.15s ease;
+  --vw-transition-base: 0.2s ease;
+
+  /* Z-Index Hierarchy */
+  --vw-z-base: 1;
+  --vw-z-dropdown: 40;
+  --vw-z-sticky: 50;
+  --vw-z-overlay: 100;
+  --vw-z-modal: 110;
+  --vw-z-toast: 120;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}

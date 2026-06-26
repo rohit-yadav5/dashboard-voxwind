@@ -5,6 +5,7 @@ import { handleAdminTools } from "./routes/admin/tools.js";
 import { handleAdminRecords } from "./routes/admin/records.js";
 import { handleAdminConfig } from "./routes/admin/config.js";
 import { handleAdminMedia } from "./routes/admin/media.js";
+import { handleAdminSites } from "./routes/admin/sites.js";
 import { handlePublicConfig } from "./routes/public/config.js";
 
 const API_PREFIX = "/api/admin";
@@ -30,12 +31,53 @@ export default {
       return handleSession(request, env);
     }
 
+    if (url.pathname === `${API_PREFIX}/logout` && request.method === "POST") {
+      const authOrigin = env.AUTH_ORIGIN || "https://auth.voxwind.com";
+      const cookie = request.headers.get("Cookie");
+      
+      const reqHeaders = new Headers();
+      if (cookie) {
+        reqHeaders.set("Cookie", cookie);
+      }
+      
+      try {
+        const authRes = await fetch(`${authOrigin}/api/logout`, {
+          method: "POST",
+          headers: reqHeaders
+        });
+        
+        const resHeaders = new Headers();
+        if (authRes.headers.getSetCookie) {
+          for (const cookieVal of authRes.headers.getSetCookie()) {
+            resHeaders.append("Set-Cookie", cookieVal);
+          }
+        } else {
+          const setCookie = authRes.headers.get("Set-Cookie");
+          if (setCookie) {
+            resHeaders.set("Set-Cookie", setCookie);
+          }
+        }
+        
+        const body = await authRes.json().catch(() => ({ ok: true }));
+        return json(body, request, env, { status: authRes.status, headers: resHeaders });
+      } catch (err) {
+        console.error("Logout request forwarding failed", err);
+        return json({ ok: false, error: "Logout failed" }, request, env, { status: 500 });
+      }
+    }
+
+
     if (url.pathname.startsWith(API_PREFIX)) {
       const auth = await requireAdmin(request, env);
       if (!auth.ok) return json({ ok: false, error: auth.error }, request, env, { status: auth.status });
 
       if (url.pathname.startsWith(`${API_PREFIX}/tools`)) {
         return handleAdminTools(request, env, ctx, auth);
+      }
+      
+      if (url.pathname.startsWith(`${API_PREFIX}/sites`)) {
+        const response = await handleAdminSites(request, env, ctx, auth);
+        if (response) return response;
       }
 
       if (url.pathname.startsWith(`${API_PREFIX}/config`)) {

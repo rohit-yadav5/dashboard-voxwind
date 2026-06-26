@@ -187,6 +187,54 @@ export async function getAnalytics() {
   return structuredClone(analytics);
 }
 
+// Sites API
+export async function listSites() {
+  const data = await request("/api/admin/sites");
+  return data.sites || [];
+}
+
+export async function getSite(idOrSlug) {
+  const data = await request(`/api/admin/sites/${encodeURIComponent(idOrSlug)}`);
+  return data.site;
+}
+
+export async function createSite(payload) {
+  const data = await request("/api/admin/sites", {
+    method: "POST",
+    body: payload
+  });
+  return data.site;
+}
+
+export async function updateSite(id, payload) {
+  const data = await request(`/api/admin/sites/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    body: payload
+  });
+  return data.site;
+}
+
+export async function archiveSite(id) {
+  const data = await request(`/api/admin/sites/${encodeURIComponent(id)}/archive`, {
+    method: "POST"
+  });
+  return data.site;
+}
+
+// Site Resources API
+export async function listSiteResources(siteId) {
+  const data = await request(`/api/admin/sites/${encodeURIComponent(siteId)}/resources`);
+  return data.resources || [];
+}
+
+export async function syncSiteResources(siteId, provider = "cloudflare") {
+  const data = await request(`/api/admin/sites/${encodeURIComponent(siteId)}/sync`, {
+    method: "POST",
+    body: { provider }
+  });
+  return data;
+}
+
 function normalizeTool(tool = {}) {
   return {
     id: tool.id,

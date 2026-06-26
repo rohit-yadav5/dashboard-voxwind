@@ -1,5 +1,6 @@
-import { appLayout, bindLayout } from "../components/layout.js";
-import { badge, chart, metric, pageHead, section, switchEl } from "../components/ui.js";
+import { Badge, Button, PageHeader } from "../components/ui.js";
+import { Toggle, SearchInput } from "../components/forms.js";
+import { Card, MetricCard } from "../components/cards.js";
 import { closeModal, openModal } from "../components/modal.js";
 import { toast } from "../components/toast.js";
 import { serializeForm } from "../core/form-helpers.js";
@@ -23,14 +24,52 @@ import {
   archiveHomepageSection
 } from "../services/admin-api.js";
 
-// Common Confirmation Modal Helper (No browser confirm allowed)
+// Design System mapping helpers
+function badge(label, customTone) {
+  if (customTone) {
+    return Badge({ label, tone: customTone });
+  }
+  const toneMap = {
+    live: "success",
+    active: "success",
+    published: "success",
+    public: "success",
+    enabled: "success",
+    maintenance: "warning",
+    beta: "warning",
+    unlisted: "warning",
+    draft: "default",
+    internal: "default",
+    archived: "danger",
+    private: "danger",
+    disabled: "danger"
+  };
+  const tone = toneMap[label] || "default";
+  return Badge({ label, tone });
+}
+
+function switchEl(checked, label = "") {
+  const id = "switch-" + Math.random().toString(36).substr(2, 9);
+  return Toggle({ id, label: "", checked });
+}
+
+function metric(label, value) {
+  return MetricCard({ label, value });
+}
+
+function section(title, subtitle, body, actions = "") {
+  const children = subtitle ? `<p class="vw-text-muted" style="margin-bottom: var(--vw-space-4); font-size: 13px;">${subtitle}</p>${body}` : body;
+  return Card({ title, children, actions });
+}
+
+// Common Confirmation Modal Helper
 function openConfirmModal({ title, message, onConfirm }) {
   openModal({
     title,
-    body: `<p style="margin:0;line-height:1.5">${message}</p>`,
+    body: `<p style="margin:0;line-height:1.5;color:var(--vw-text);">${message}</p>`,
     actions: `
-      <button class="btn btn-primary" id="confirm-ok-btn">Confirm</button>
-      <button class="btn btn-ghost" data-close-modal>Cancel</button>
+      ${Button({ label: "Confirm", variant: "primary", extraAttrs: 'id="confirm-ok-btn"' })}
+      ${Button({ label: "Cancel", variant: "ghost", extraAttrs: 'data-close-modal' })}
     `
   });
   document.getElementById("confirm-ok-btn")?.addEventListener("click", async () => {
@@ -45,15 +84,15 @@ async function handlePublishAction() {
     title: "Publish config snapshot",
     body: `
       <form id="publish-modal-form">
-        <div class="field wide">
-          <label>Publish Notes</label>
-          <input class="input" name="notes" placeholder="e.g. updated hero headline and flags" required>
+        <div class="vw-field">
+          <label class="vw-label">Publish Notes</label>
+          <input class="vw-input" name="notes" placeholder="e.g. updated hero headline and flags" required>
         </div>
       </form>
     `,
     actions: `
-      <button class="btn btn-primary" id="publish-ok-btn">Publish</button>
-      <button class="btn btn-ghost" data-close-modal>Cancel</button>
+      ${Button({ label: "Publish", variant: "primary", extraAttrs: 'id="publish-ok-btn"' })}
+      ${Button({ label: "Cancel", variant: "ghost", extraAttrs: 'data-close-modal' })}
     `
   });
 
@@ -77,18 +116,93 @@ async function handlePublishAction() {
 }
 
 export function usersPage() {
-  return tablePage({
-    title: "Users",
-    subtitle: "Placeholder user management UI prepared for auth-voxwind integration.",
-    permissionNote: "Future actions: invite user, assign role, suspend user, inspect sessions.",
-    headers: ["User", "Role", "Status", "Created"],
-    rows: async () => (await listUsers()).map((user) => [
-      `<strong>${user.name}</strong><br><span class="muted small">${user.email}</span>`,
-      badge(user.role),
-      badge(user.status, user.status === "active" ? "enabled" : "draft"),
-      user.createdAt
-    ])
-  });
+  let searchTerm = "";
+  
+  return {
+    render: async () => {
+      const allUsers = await listUsers();
+      
+      const renderRows = (filteredUsers) => {
+        if (filteredUsers.length === 0) {
+          return `<tr><td colspan="4" style="text-align: center; padding: var(--vw-space-5); color: var(--vw-text-muted);">No users found</td></tr>`;
+        }
+        return filteredUsers.map((user) => `
+          <tr>
+            <td><strong>${user.name}</strong><br><span class="vw-text-muted vw-text-sm">${user.email}</span></td>
+            <td>${badge(user.role)}</td>
+            <td>${badge(user.status, user.status === "active" ? "success" : "default")}</td>
+            <td>${user.createdAt}</td>
+          </tr>
+        `).join("");
+      };
+
+      const filtered = allUsers.filter(user => 
+        user.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        user.email.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        user.role.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+
+      return `
+        <div class="vw-page">
+        ${PageHeader({ 
+          title: "Users", 
+          subtitle: "User management UI prepared for auth-voxwind integration." 
+        })}
+        <div class="vw-card">
+          <p class="vw-text-muted" style="margin-top:0; margin-bottom: var(--vw-space-4);">Future actions: invite user, assign role, suspend user, inspect sessions.</p>
+          
+          <div style="margin-bottom: var(--vw-space-4); max-width: 320px;">
+            ${SearchInput({ id: "user-search", placeholder: "Search users by name, email, role..." })}
+          </div>
+
+          <div class="vw-table-container">
+            <table class="vw-table">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th>Created</th>
+                </tr>
+              </thead>
+              <tbody id="users-table-body">
+                ${renderRows(filtered)}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        </div>
+      `;
+    },
+    afterRender: () => {
+      const searchEl = document.getElementById("user-search");
+      if (searchEl) {
+        searchEl.addEventListener("input", async (e) => {
+          searchTerm = e.target.value;
+          const allUsers = await listUsers();
+          const filtered = allUsers.filter(user => 
+            user.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+            user.email.toLowerCase().includes(searchTerm.toLowerCase()) || 
+            user.role.toLowerCase().includes(searchTerm.toLowerCase())
+          );
+          
+          const tbody = document.getElementById("users-table-body");
+          if (tbody) {
+            tbody.innerHTML = filtered.length === 0 
+              ? `<tr><td colspan="4" style="text-align: center; padding: var(--vw-space-5); color: var(--vw-text-muted);">No users found</td></tr>`
+              : filtered.map((user) => `
+                  <tr>
+                    <td><strong>${user.name}</strong><br><span class="vw-text-muted vw-text-sm">${user.email}</span></td>
+                    <td>${badge(user.role)}</td>
+                    <td>${badge(user.status, user.status === "active" ? "success" : "default")}</td>
+                    <td>${user.createdAt}</td>
+                  </tr>
+                `).join("");
+          }
+        });
+      }
+    }
+  };
 }
 
 // Homepage Sections Page
@@ -96,17 +210,20 @@ export function homepagePage() {
   return {
     render: async () => {
       const items = await listHomepageSections();
-      return appLayout(`
-        ${pageHead("Homepage", "Config-driven homepage sections for future automatic publishing to voxwind.com.", `
-          <button class="btn btn-primary" type="button" id="new-section-btn">New section</button>
-        `)}
-        <section class="panel">
-          <div class="toolbar">
-            <button class="btn btn-ghost" id="publish-config">Publish config snapshot</button>
-            <span class="muted small">Publishes all draft updates to the KV cache.</span>
+      return `
+        <div class="vw-page">
+        ${PageHeader({
+          title: "Homepage",
+          subtitle: "Config-driven homepage sections for future automatic publishing to voxwind.com.",
+          actions: Button({ label: "New section", variant: "primary", extraAttrs: 'id="new-section-btn"' })
+        })}
+        <div class="vw-card">
+          <div style="display: flex; flex-wrap: wrap; gap: var(--vw-space-3); align-items: center; margin-bottom: var(--vw-space-4);">
+            ${Button({ label: "Publish config snapshot", variant: "ghost", extraAttrs: 'id="publish-config"' })}
+            <span class="vw-text-muted vw-text-sm">Publishes all draft updates to the KV cache.</span>
           </div>
-          <div class="table-wrap">
-            <table class="table">
+          <div class="vw-table-container">
+            <table class="vw-table">
               <thead><tr><th>Order</th><th>Section Key</th><th>Title</th><th>Type</th><th>Status</th><th>Enabled</th><th>Actions</th></tr></thead>
               <tbody>
                 ${items.map((item) => `
@@ -115,32 +232,29 @@ export function homepagePage() {
                     <td><strong>${item.key}</strong></td>
                     <td>
                       <strong>${item.name || "Untitled"}</strong><br>
-                      <span class="muted small">Draft v${item.draftVersion} · Published v${item.publishedVersion}</span>
+                      <span class="vw-text-muted vw-text-sm">Draft v${item.draftVersion} · Published v${item.publishedVersion}</span>
                     </td>
                     <td>${item.type}</td>
                     <td>${badge(item.status)}</td>
                     <td><span data-toggle-section="${item.id}">${switchEl(item.enabled, `Toggle ${item.name}`)}</span></td>
                     <td>
-                      <div class="page-actions">
-                        <button class="btn btn-ghost" data-edit-section="${item.id}">Edit</button>
-                        <button class="btn btn-ghost" data-archive-section="${item.id}">Archive</button>
+                      <div style="display: flex; gap: var(--vw-space-2);">
+                        ${Button({ label: "Edit", variant: "ghost", extraAttrs: `data-edit-section="${item.id}"` })}
+                        ${Button({ label: "Archive", variant: "ghost", extraAttrs: `data-archive-section="${item.id}"` })}
                       </div>
                     </td>
                   </tr>
-                `).join("") || '<tr><td colspan="7" class="muted">No homepage sections configured.</td></tr>'}
+                `).join("") || '<tr><td colspan="7" class="vw-text-muted" style="text-align:center;">No homepage sections configured.</td></tr>'}
               </tbody>
             </table>
           </div>
-        </section>
-      `);
+        </div>
+        </div>
+      `;
     },
     afterRender: () => {
-      bindLayout();
-      
-      // Publish button
       document.getElementById("publish-config")?.addEventListener("click", handlePublishAction);
 
-      // Toggle Switch
       document.querySelectorAll("[data-toggle-section]").forEach((el) => {
         el.addEventListener("click", async () => {
           const secId = el.dataset.toggleSection;
@@ -158,12 +272,10 @@ export function homepagePage() {
         });
       });
 
-      // New Section Modal
       document.getElementById("new-section-btn")?.addEventListener("click", () => {
         openHomepageSectionModal();
       });
 
-      // Edit Section Modal
       document.querySelectorAll("[data-edit-section]").forEach((el) => {
         el.addEventListener("click", async () => {
           const secId = el.dataset.editSection;
@@ -177,7 +289,6 @@ export function homepagePage() {
         });
       });
 
-      // Archive Section
       document.querySelectorAll("[data-archive-section]").forEach((el) => {
         el.addEventListener("click", async () => {
           const secId = el.dataset.archiveSection;
@@ -206,38 +317,38 @@ function openHomepageSectionModal(item = null) {
   openModal({
     title: isEdit ? "Edit homepage section" : "New homepage section",
     body: `
-      <form id="section-modal-form">
-        <div class="field">
-          <label>Section Key</label>
-          <input class="input" name="section_key" value="${item ? item.key : ""}" placeholder="hero" ${isEdit ? "readonly" : ""}>
+      <form id="section-modal-form" style="display: flex; flex-direction: column; gap: var(--vw-space-3);">
+        <div class="vw-field">
+          <label class="vw-label">Section Key</label>
+          <input class="vw-input" name="section_key" value="${item ? item.key : ""}" placeholder="hero" ${isEdit ? "readonly" : ""}>
         </div>
-        <div class="field">
-          <label>Title</label>
-          <input class="input" name="title" value="${item ? (item.name || "").replace(/"/g, "&quot;") : ""}" placeholder="Hero section">
+        <div class="vw-field">
+          <label class="vw-label">Title</label>
+          <input class="vw-input" name="title" value="${item ? (item.name || "").replace(/"/g, "&quot;") : ""}" placeholder="Hero section">
         </div>
-        <div class="field">
-          <label>Section Type</label>
-          <input class="input" name="section_type" value="${item ? item.type : "content"}" placeholder="hero">
+        <div class="vw-field">
+          <label class="vw-label">Section Type</label>
+          <input class="vw-input" name="section_type" value="${item ? item.type : "content"}" placeholder="hero">
         </div>
-        <div class="field">
-          <label>Order Index</label>
-          <input class="input" type="number" name="order_index" value="${item ? item.order : 10}">
+        <div class="vw-field">
+          <label class="vw-label">Order Index</label>
+          <input class="vw-input" type="number" name="order_index" value="${item ? item.order : 10}">
         </div>
-        <div class="field wide">
-          <label>Content JSON</label>
-          <textarea class="textarea" name="content" placeholder='{ "headline": "VoxWind" }' style="font-family:monospace">${contentStr}</textarea>
+        <div class="vw-field">
+          <label class="vw-label">Content JSON</label>
+          <textarea class="vw-textarea" name="content" placeholder='{ "headline": "VoxWind" }' style="font-family:monospace">${contentStr}</textarea>
         </div>
-        <div class="field" style="margin-top:12px">
-          <label style="display:flex;align-items:center;gap:10px">
-            <input type="checkbox" name="enabled" ${!item || item.enabled ? "checked" : ""}>
-            <span>Section is enabled</span>
+        <div class="vw-field" style="margin-top:4px">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+            <input type="checkbox" name="enabled" style="width: 16px; height: 16px; accent-color: var(--vw-accent);" ${!item || item.enabled ? "checked" : ""}>
+            <span class="vw-label">Section is enabled</span>
           </label>
         </div>
       </form>
     `,
     actions: `
-      <button class="btn btn-primary" id="section-save-btn">Save draft</button>
-      <button class="btn btn-ghost" data-close-modal>Cancel</button>
+      ${Button({ label: "Save draft", variant: "primary", extraAttrs: 'id="section-save-btn"' })}
+      ${Button({ label: "Cancel", variant: "ghost", extraAttrs: 'data-close-modal' })}
     `
   });
 
@@ -246,7 +357,6 @@ function openHomepageSectionModal(item = null) {
     if (!form) return;
     const raw = serializeForm(form);
     
-    // Parse JSON safely
     try {
       JSON.parse(raw.content || "{}");
     } catch {
@@ -284,50 +394,50 @@ export function announcementsPage() {
   return {
     render: async () => {
       const items = await listAnnouncements();
-      return appLayout(`
-        ${pageHead("Announcements", "Manage public and internal announcements without code deployments.", `
-          <button class="btn btn-primary" type="button" id="new-ann-btn">New announcement</button>
-        `)}
-        <section class="panel">
-          <div class="toolbar">
-            <button class="btn btn-ghost" id="publish-config">Publish config snapshot</button>
-            <span class="muted small">Publishes all draft updates to the KV cache.</span>
+      return `
+        <div class="vw-page">
+        ${PageHeader({
+          title: "Announcements",
+          subtitle: "Manage public and internal announcements without code deployments.",
+          actions: Button({ label: "New announcement", variant: "primary", extraAttrs: 'id="new-ann-btn"' })
+        })}
+        <div class="vw-card">
+          <div style="display: flex; flex-wrap: wrap; gap: var(--vw-space-3); align-items: center; margin-bottom: var(--vw-space-4);">
+            ${Button({ label: "Publish config snapshot", variant: "ghost", extraAttrs: 'id="publish-config"' })}
+            <span class="vw-text-muted vw-text-sm">Publishes all draft updates to the KV cache.</span>
           </div>
-          <div class="table-wrap">
-            <table class="table">
+          <div class="vw-table-container">
+            <table class="vw-table">
               <thead><tr><th>Title</th><th>Audience</th><th>Status</th><th>Starts</th><th>Enabled</th><th>Actions</th></tr></thead>
               <tbody>
                 ${items.map((item) => `
                   <tr>
                     <td>
                       <strong>${item.title}</strong><br>
-                      <span class="muted small">Draft v${item.draftVersion} · Published v${item.publishedVersion}</span>
+                      <span class="vw-text-muted vw-text-sm">Draft v${item.draftVersion} · Published v${item.publishedVersion}</span>
                     </td>
                     <td>${badge(item.audience)}</td>
                     <td>${badge(item.status)}</td>
                     <td>${item.startsAt || "Immediate"}</td>
                     <td><span data-toggle-announcement="${item.id}">${switchEl(item.enabled, `Toggle ${item.title}`)}</span></td>
                     <td>
-                      <div class="page-actions">
-                        <button class="btn btn-ghost" data-edit-announcement="${item.id}">Edit</button>
-                        <button class="btn btn-ghost" data-archive-announcement="${item.id}">Archive</button>
+                      <div style="display: flex; gap: var(--vw-space-2);">
+                        ${Button({ label: "Edit", variant: "ghost", extraAttrs: `data-edit-announcement="${item.id}"` })}
+                        ${Button({ label: "Archive", variant: "ghost", extraAttrs: `data-archive-announcement="${item.id}"` })}
                       </div>
                     </td>
                   </tr>
-                `).join("") || '<tr><td colspan="6" class="muted">No announcements configured.</td></tr>'}
+                `).join("") || '<tr><td colspan="6" class="vw-text-muted" style="text-align:center;">No announcements configured.</td></tr>'}
               </tbody>
             </table>
           </div>
-        </section>
-      `);
+        </div>
+        </div>
+      `;
     },
     afterRender: () => {
-      bindLayout();
-
-      // Publish button
       document.getElementById("publish-config")?.addEventListener("click", handlePublishAction);
 
-      // Toggle Switch
       document.querySelectorAll("[data-toggle-announcement]").forEach((el) => {
         el.addEventListener("click", async () => {
           const annId = el.dataset.toggleAnnouncement;
@@ -345,12 +455,10 @@ export function announcementsPage() {
         });
       });
 
-      // New Announcement Modal
       document.getElementById("new-ann-btn")?.addEventListener("click", () => {
         openAnnouncementModal();
       });
 
-      // Edit Announcement Modal
       document.querySelectorAll("[data-edit-announcement]").forEach((el) => {
         el.addEventListener("click", async () => {
           const annId = el.dataset.editAnnouncement;
@@ -364,7 +472,6 @@ export function announcementsPage() {
         });
       });
 
-      // Archive Announcement
       document.querySelectorAll("[data-archive-announcement]").forEach((el) => {
         el.addEventListener("click", async () => {
           const annId = el.dataset.archiveAnnouncement;
@@ -392,37 +499,37 @@ function openAnnouncementModal(item = null) {
   openModal({
     title: isEdit ? "Edit announcement" : "New announcement",
     body: `
-      <form id="announcement-modal-form">
-        <div class="field">
-          <label>Title</label>
-          <input class="input" name="title" value="${item ? item.title.replace(/"/g, "&quot;") : ""}" placeholder="System maintenance">
+      <form id="announcement-modal-form" style="display: flex; flex-direction: column; gap: var(--vw-space-3);">
+        <div class="vw-field">
+          <label class="vw-label">Title</label>
+          <input class="vw-input" name="title" value="${item ? item.title.replace(/"/g, "&quot;") : ""}" placeholder="System maintenance">
         </div>
-        <div class="field">
-          <label>Audience</label>
-          <select class="select" name="audience">
+        <div class="vw-field">
+          <label class="vw-label">Audience</label>
+          <select class="vw-select" name="audience">
             <option value="public" ${item && item.audience === "public" ? "selected" : ""}>public</option>
             <option value="internal" ${item && item.audience === "internal" ? "selected" : ""}>internal</option>
           </select>
         </div>
-        <div class="field">
-          <label>Starts At (YYYY-MM-DD or Unix Epoch)</label>
-          <input class="input" name="startsAt" value="${item ? item.startsAt || "" : ""}" placeholder="2026-06-01">
+        <div class="vw-field">
+          <label class="vw-label">Starts At (YYYY-MM-DD or Unix Epoch)</label>
+          <input class="vw-input" name="startsAt" value="${item ? item.startsAt || "" : ""}" placeholder="2026-06-01">
         </div>
-        <div class="field wide">
-          <label>Body</label>
-          <textarea class="textarea" name="body" placeholder="Announcement details...">${item ? item.body || "" : ""}</textarea>
+        <div class="vw-field">
+          <label class="vw-label">Body</label>
+          <textarea class="vw-textarea" name="body" placeholder="Announcement details...">${item ? item.body || "" : ""}</textarea>
         </div>
-        <div class="field" style="margin-top:12px">
-          <label style="display:flex;align-items:center;gap:10px">
-            <input type="checkbox" name="enabled" ${!item || item.enabled ? "checked" : ""}>
-            <span>Announcement is active/enabled</span>
+        <div class="vw-field" style="margin-top:4px">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+            <input type="checkbox" name="enabled" style="width: 16px; height: 16px; accent-color: var(--vw-accent);" ${!item || item.enabled ? "checked" : ""}>
+            <span class="vw-label">Announcement is active/enabled</span>
           </label>
         </div>
       </form>
     `,
     actions: `
-      <button class="btn btn-primary" id="ann-save-btn">Save draft</button>
-      <button class="btn btn-ghost" data-close-modal>Cancel</button>
+      ${Button({ label: "Save draft", variant: "primary", extraAttrs: 'id="ann-save-btn"' })}
+      ${Button({ label: "Cancel", variant: "ghost", extraAttrs: 'data-close-modal' })}
     `
   });
 
@@ -460,17 +567,20 @@ export function flagsPage() {
   return {
     render: async () => {
       const flags = await listFlags();
-      return appLayout(`
-        ${pageHead("Feature flags", "Runtime controls for tools, auth, dashboard modules, and public config.", `
-          <button class="btn btn-primary" type="button" id="new-flag-btn">New flag</button>
-        `)}
-        <section class="panel">
-          <div class="toolbar">
-            <button class="btn btn-ghost" id="publish-config">Publish config snapshot</button>
-            <span class="muted small">Publishes all draft updates to the KV cache.</span>
+      return `
+        <div class="vw-page">
+        ${PageHeader({
+          title: "Feature flags",
+          subtitle: "Runtime controls for tools, auth, dashboard modules, and public config.",
+          actions: Button({ label: "New flag", variant: "primary", extraAttrs: 'id="new-flag-btn"' })
+        })}
+        <div class="vw-card">
+          <div style="display: flex; flex-wrap: wrap; gap: var(--vw-space-3); align-items: center; margin-bottom: var(--vw-space-4);">
+            ${Button({ label: "Publish config snapshot", variant: "ghost", extraAttrs: 'id="publish-config"' })}
+            <span class="vw-text-muted vw-text-sm">Publishes all draft updates to the KV cache.</span>
           </div>
-          <div class="table-wrap">
-            <table class="table">
+          <div class="vw-table-container">
+            <table class="vw-table">
               <thead><tr><th>Flag Key</th><th>Description</th><th>Scope</th><th>Rollout</th><th>Versions</th><th>Enabled</th><th>Actions</th></tr></thead>
               <tbody>
                 ${flags.map((flag) => `
@@ -479,29 +589,26 @@ export function flagsPage() {
                     <td>${flag.description}</td>
                     <td>${badge(flag.scope)}</td>
                     <td>${flag.rolloutPercentage}%</td>
-                    <td><span class="muted small">Draft v${flag.draftVersion} · Published v${flag.publishedVersion}</span></td>
+                    <td><span class="vw-text-muted vw-text-sm">Draft v${flag.draftVersion} · Published v${flag.publishedVersion}</span></td>
                     <td><span data-toggle-flag="${flag.id}">${switchEl(flag.enabled, `Toggle ${flag.key}`)}</span></td>
                     <td>
-                      <div class="page-actions">
-                        <button class="btn btn-ghost" data-edit-flag="${flag.id}">Edit</button>
-                        <button class="btn btn-ghost" data-archive-flag="${flag.id}">Archive</button>
+                      <div style="display: flex; gap: var(--vw-space-2);">
+                        ${Button({ label: "Edit", variant: "ghost", extraAttrs: `data-edit-flag="${flag.id}"` })}
+                        ${Button({ label: "Archive", variant: "ghost", extraAttrs: `data-archive-flag="${flag.id}"` })}
                       </div>
                     </td>
                   </tr>
-                `).join("") || '<tr><td colspan="7" class="muted">No feature flags configured.</td></tr>'}
+                `).join("") || '<tr><td colspan="7" class="vw-text-muted" style="text-align:center;">No feature flags configured.</td></tr>'}
               </tbody>
             </table>
           </div>
-        </section>
-      `);
+        </div>
+        </div>
+      `;
     },
     afterRender: () => {
-      bindLayout();
-
-      // Publish button
       document.getElementById("publish-config")?.addEventListener("click", handlePublishAction);
 
-      // Toggle Switch
       document.querySelectorAll("[data-toggle-flag]").forEach((el) => {
         el.addEventListener("click", async () => {
           const flagId = el.dataset.toggleFlag;
@@ -519,12 +626,10 @@ export function flagsPage() {
         });
       });
 
-      // New Flag Modal
       document.getElementById("new-flag-btn")?.addEventListener("click", () => {
         openFlagModal();
       });
 
-      // Edit Flag Modal
       document.querySelectorAll("[data-edit-flag]").forEach((el) => {
         el.addEventListener("click", async () => {
           const flagId = el.dataset.editFlag;
@@ -538,7 +643,6 @@ export function flagsPage() {
         });
       });
 
-      // Archive Flag
       document.querySelectorAll("[data-archive-flag]").forEach((el) => {
         el.addEventListener("click", async () => {
           const flagId = el.dataset.archiveFlag;
@@ -566,34 +670,34 @@ function openFlagModal(flag = null) {
   openModal({
     title: isEdit ? "Edit feature flag" : "New feature flag",
     body: `
-      <form id="flag-modal-form">
-        <div class="field">
-          <label>Flag Key</label>
-          <input class="input" name="flag_key" value="${flag ? flag.key : ""}" placeholder="echo.translate" ${isEdit ? "readonly" : ""}>
+      <form id="flag-modal-form" style="display: flex; flex-direction: column; gap: var(--vw-space-3);">
+        <div class="vw-field">
+          <label class="vw-label">Flag Key</label>
+          <input class="vw-input" name="flag_key" value="${flag ? flag.key : ""}" placeholder="echo.translate" ${isEdit ? "readonly" : ""}>
         </div>
-        <div class="field">
-          <label>Description</label>
-          <input class="input" name="description" value="${flag ? flag.description.replace(/"/g, "&quot;") : ""}" placeholder="Control translation features">
+        <div class="vw-field">
+          <label class="vw-label">Description</label>
+          <input class="vw-input" name="description" value="${flag ? flag.description.replace(/"/g, "&quot;") : ""}" placeholder="Control translation features">
         </div>
-        <div class="field">
-          <label>Scope</label>
-          <input class="input" name="scope" value="${flag ? flag.scope : "global"}" placeholder="tool:echo">
+        <div class="vw-field">
+          <label class="vw-label">Scope</label>
+          <input class="vw-input" name="scope" value="${flag ? flag.scope : "global"}" placeholder="tool:echo">
         </div>
-        <div class="field">
-          <label>Rollout Percentage (0-100)</label>
-          <input class="input" type="number" min="0" max="100" name="rollout_percentage" value="${flag ? flag.rolloutPercentage : 100}">
+        <div class="vw-field">
+          <label class="vw-label">Rollout Percentage (0-100)</label>
+          <input class="vw-input" type="number" min="0" max="100" name="rollout_percentage" value="${flag ? flag.rolloutPercentage : 100}">
         </div>
-        <div class="field" style="margin-top:12px">
-          <label style="display:flex;align-items:center;gap:10px">
-            <input type="checkbox" name="enabled" ${!flag || flag.enabled ? "checked" : ""}>
-            <span>Flag is enabled</span>
+        <div class="vw-field" style="margin-top:4px">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+            <input type="checkbox" name="enabled" style="width: 16px; height: 16px; accent-color: var(--vw-accent);" ${!flag || flag.enabled ? "checked" : ""}>
+            <span class="vw-label">Flag is enabled</span>
           </label>
         </div>
       </form>
     `,
     actions: `
-      <button class="btn btn-primary" id="flag-save-btn">Save draft</button>
-      <button class="btn btn-ghost" data-close-modal>Cancel</button>
+      ${Button({ label: "Save draft", variant: "primary", extraAttrs: 'id="flag-save-btn"' })}
+      ${Button({ label: "Cancel", variant: "ghost", extraAttrs: 'data-close-modal' })}
     `
   });
 
@@ -645,7 +749,7 @@ export function seoPage() {
     permissionNote: "Future actions: edit meta, preview SERP/social cards, publish sitemap.",
     headers: ["Path", "Title", "Status"],
     rows: async () => (await listSeoPages()).map((item) => [
-      `<span class="muted small">${item.path}</span>`,
+      `<span class="vw-text-muted vw-text-sm">${item.path}</span>`,
       `<strong>${item.title}</strong>`,
       badge(item.status)
     ])
@@ -657,26 +761,30 @@ export function settingsPage() {
   return {
     render: async () => {
       const versions = await listConfigVersions();
-      return appLayout(`
-        ${pageHead("Settings", "Cloudflare-native runtime configuration planning surface.")}
-        <div class="grid grid-2">
+      return `
+        <div class="vw-page">
+        ${PageHeader({
+          title: "Settings",
+          subtitle: "Cloudflare-native runtime configuration planning surface."
+        })}
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--vw-space-4); margin-bottom: var(--vw-space-5);">
           ${section("Public config flow", "D1 remains the source of truth. KV serves fast runtime snapshots.", `
             <div class="timeline">
               ${["Dashboard writes record", "Worker validates permissions", "D1 transaction stores draft", "Publish refreshes KV", "Public APIs read cached snapshot"].map((item) => `
-                <div class="timeline-item"><span class="timeline-dot"></span><div>${item}</div></div>
+                <div class="timeline-item"><span class="timeline-dot"></span><div class="vw-text-muted vw-text-sm">${item}</div></div>
               `).join("")}
             </div>
           `)}
           ${section("Bindings prepared", "The Worker config is ready for future resources.", `
-            <p><strong>D1</strong><br><span class="muted">DB source of truth for admin data.</span></p>
-            <p><strong>KV</strong><br><span class="muted">CONFIG_CACHE and RATE_LIMIT namespaces.</span></p>
-            <p><strong>R2</strong><br><span class="muted">MEDIA_BUCKET for uploaded assets.</span></p>
+            <p style="margin-top:0;"><strong>D1</strong><br><span class="vw-text-muted vw-text-sm">DB source of truth for admin data.</span></p>
+            <p><strong>KV</strong><br><span class="vw-text-muted vw-text-sm">CONFIG_CACHE and RATE_LIMIT namespaces.</span></p>
+            <p style="margin-bottom:0;"><strong>R2</strong><br><span class="vw-text-muted vw-text-sm">MEDIA_BUCKET for uploaded assets.</span></p>
           `)}
         </div>
-        <div style="margin-top: 18px">
+        <div>
           ${section("Config Version Registry", "Lightweight metadata log of previous configurations published from the dashboard.", `
-            <div class="table-wrap">
-              <table class="table" style="min-width: 100%">
+            <div class="vw-table-container">
+              <table class="vw-table" style="min-width: 100%">
                 <thead>
                   <tr>
                     <th>Version</th>
@@ -689,21 +797,22 @@ export function settingsPage() {
                 <tbody>
                   ${versions.map((v) => `
                     <tr>
-                      <td><strong>v${v.version}</strong> ${badge(v.status, v.status === "published" ? "live" : "draft")}</td>
-                      <td>${v.notes || '<span class="muted" style="font-style:italic">No notes provided</span>'}</td>
+                      <td><strong>v${v.version}</strong> ${badge(v.status, v.status === "published" ? "success" : "default")}</td>
+                      <td>${v.notes || '<span class="vw-text-muted" style="font-style:italic">No notes provided</span>'}</td>
                       <td><code>${v.created_by || "system"}</code></td>
                       <td>${new Date(v.created_at * 1000).toLocaleString()}</td>
                       <td>${v.published_at ? new Date(v.published_at * 1000).toLocaleString() : "Never"}</td>
                     </tr>
-                  `).join("") || '<tr><td colspan="5" class="muted">No version records found.</td></tr>'}
+                  `).join("") || '<tr><td colspan="5" class="vw-text-muted" style="text-align:center;">No version records found.</td></tr>'}
                 </tbody>
               </table>
             </div>
           `)}
         </div>
-      `);
+        </div>
+      `;
     },
-    afterRender: bindLayout
+    afterRender: () => {}
   };
 }
 
@@ -711,28 +820,48 @@ export function analyticsPage() {
   return {
     render: async () => {
       const data = await getAnalytics();
-      return appLayout(`
-        ${pageHead("Analytics", "Mock analytics placeholders for users, tools, API requests, and events.")}
-        <div class="grid grid-4">
+      return `
+        <div class="vw-page">
+        ${PageHeader({
+          title: "Analytics",
+          subtitle: "Mock analytics placeholders for users, tools, API requests, and events."
+        })}
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--vw-space-4); margin-bottom: var(--vw-space-5);">
           ${metric("Users", data.totals.users.toLocaleString())}
           ${metric("Usage events", data.totals.toolUsage.toLocaleString())}
           ${metric("API requests", data.totals.apiRequests.toLocaleString())}
           ${metric("Active tools", data.totals.activeTools)}
         </div>
-        <div class="grid grid-2" style="margin-top:16px">
-          ${section("Growth chart", "Mock monthly trend.", chart(data.growth))}
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: var(--vw-space-4);">
+          ${section("Growth chart", "Mock monthly trend.", `
+            <div style="display: flex; align-items: flex-end; justify-content: space-between; height: 180px; padding: var(--vw-space-4) var(--vw-space-3); background: var(--vw-surface); border: 1px solid var(--vw-border); border-radius: var(--vw-radius-md);">
+              ${[40, 60, 45, 75, 55, 90, 80, 110, 95, 125, 120, 150].map((val, idx) => {
+                const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                const percent = (val / 150) * 100;
+                return `
+                  <div style="display: flex; flex-direction: column; align-items: center; flex: 1; gap: 8px;">
+                    <div style="position: relative; width: 12px; height: 100px; background: rgba(10, 132, 255, 0.1); border-radius: 6px; overflow: hidden; display: flex; align-items: flex-end;">
+                      <div style="width: 100%; height: ${percent}%; background: linear-gradient(180deg, var(--vw-info) 0%, rgba(10, 132, 255, 0.3) 100%); border-radius: 6px;"></div>
+                    </div>
+                    <span style="font-size: 10px; color: var(--vw-text-muted); font-weight: 500;">${months[idx]}</span>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          `)}
           ${section("Top tools", "Future source: daily usage aggregates.", `
-            <div class="table-wrap">
-              <table class="table">
+            <div class="vw-table-container">
+              <table class="vw-table">
                 <thead><tr><th>Tool</th><th>Usage</th></tr></thead>
                 <tbody>${data.topTools.map((tool) => `<tr><td>${tool.name}</td><td>${tool.usage.toLocaleString()}</td></tr>`).join("")}</tbody>
               </table>
             </div>
           `)}
         </div>
-      `);
+        </div>
+      `;
     },
-    afterRender: bindLayout
+    afterRender: () => {}
   };
 }
 
@@ -740,39 +869,47 @@ function tablePage({ title, subtitle, permissionNote, headers, rows }) {
   return {
     render: async () => {
       const bodyRows = await rows();
-      return appLayout(`
-        ${pageHead(title, subtitle)}
-        <section class="panel">
-          <p class="muted" style="margin-top:0">${permissionNote}</p>
-          <div class="table-wrap">
-            <table class="table">
+      return `
+        <div class="vw-page">
+        ${PageHeader({ title, subtitle })}
+        <div class="vw-card">
+          <p class="vw-text-muted" style="margin-top:0; margin-bottom: var(--vw-space-4);">${permissionNote}</p>
+          <div class="vw-table-container">
+            <table class="vw-table">
               <thead><tr>${headers.map((h) => `<th>${h}</th>`).join("")}</tr></thead>
               <tbody>
                 ${bodyRows.map((row) => `<tr>${row.map((cell) => `<td>${cell}</td>`).join("")}</tr>`).join("")}
               </tbody>
             </table>
           </div>
-        </section>
-      `);
+        </div>
+        </div>
+      `;
     },
-    afterRender: bindLayout
+    afterRender: () => {}
   };
 }
 
 function placeholderPage(title, subtitle, points) {
   return {
-    render: () => appLayout(`
-      ${pageHead(title, subtitle)}
-      <section class="panel">
-        <div class="empty-state">
-          <h2 style="margin-top:0">${title} foundation</h2>
-          <p>${subtitle}</p>
+    render: () => `
+      <div class="vw-page">
+      ${PageHeader({ title, subtitle })}
+      <div class="vw-card">
+        <div class="vw-empty" style="margin-bottom: var(--vw-space-4);">
+          <h2 class="vw-empty-title" style="margin-top:0">${title} foundation</h2>
+          <p class="vw-empty-desc">${subtitle}</p>
         </div>
-        <div class="grid grid-3" style="margin-top:16px">
-          ${points.map((point) => `<article class="card metric-card"><div class="metric-label">${point}</div></article>`).join("")}
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--vw-space-4);">
+          ${points.map((point) => `
+            <div class="vw-metric-card">
+              <div class="vw-metric-label">${point}</div>
+            </div>
+          `).join("")}
         </div>
-      </section>
-    `),
-    afterRender: bindLayout
+      </div>
+      </div>
+    `,
+    afterRender: () => {}
   };
 }

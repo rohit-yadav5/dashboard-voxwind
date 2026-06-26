@@ -1,5 +1,5 @@
-import { appLayout, bindLayout } from "../components/layout.js";
-import { badge, pageHead, switchEl } from "../components/ui.js";
+import { Badge, Button, PageHeader } from "../components/ui.js";
+import { Toggle } from "../components/forms.js";
 import { toast } from "../components/toast.js";
 import { closeModal, openModal } from "../components/modal.js";
 import { serializeForm } from "../core/form-helpers.js";
@@ -7,28 +7,54 @@ import { archiveTool, duplicateTool, listTools, publishConfig, updateTool } from
 
 let filter = "all";
 
+function badge(label) {
+  const toneMap = {
+    live: "success",
+    active: "success",
+    published: "success",
+    public: "success",
+    maintenance: "warning",
+    beta: "warning",
+    unlisted: "warning",
+    draft: "default",
+    internal: "default",
+    archived: "danger",
+    private: "danger"
+  };
+  const tone = toneMap[label] || "default";
+  return Badge({ label, tone });
+}
+
+function switchEl(checked, label = "") {
+  const id = "switch-" + Math.random().toString(36).substr(2, 9);
+  return Toggle({ id, label: "", checked });
+}
+
 export function toolsPage() {
   return {
     render: async () => {
       const tools = await listTools();
       const filtered = filter === "all" ? tools : tools.filter((tool) => tool.status === filter || tool.category === filter);
-      return appLayout(`
-        ${pageHead("Tools", "Dynamic registry for every current and future VoxWind tool.", `
-          <a class="btn btn-primary" href="/dashboard/tools/add" data-route>Add tool</a>
-        `)}
-        <section class="panel">
-          <div class="toolbar">
-            <select class="select" id="tool-filter" style="width:180px">
+      return `
+        <div class="vw-page">
+        ${PageHeader({
+          title: "Tools",
+          subtitle: "Dynamic registry for every current and future VoxWind tool.",
+          actions: Button({ label: "Add tool", href: "/dashboard/tools/add", variant: "primary" })
+        })}
+        <div class="vw-card">
+          <div style="display: flex; flex-wrap: wrap; gap: var(--vw-space-3); align-items: center; margin-bottom: var(--vw-space-4);">
+            <select class="vw-select" id="tool-filter" style="width: 180px; min-height: 38px; padding: 0 10px;">
               ${["all", "live", "beta", "draft", "Audio", "Transfer", "Utility"].map((item) => `<option value="${item}" ${filter === item ? "selected" : ""}>${item}</option>`).join("")}
             </select>
-            <button class="btn btn-ghost" id="publish-config">Publish config snapshot</button>
-            <span class="muted small">Publishes D1 drafts into the environment KV cache.</span>
+            ${Button({ label: "Publish config snapshot", variant: "ghost", extraAttrs: 'id="publish-config"' })}
+            <span class="vw-text-muted vw-text-sm">Publishes D1 drafts into the environment KV cache.</span>
           </div>
-          <div class="table-wrap">
-            <table class="table">
+          <div class="vw-table-container">
+            <table class="vw-table">
               <thead>
                 <tr>
-                  <th style="width:28px">Order</th>
+                  <th style="width: 50px;">Order</th>
                   <th>Tool</th>
                   <th>Status</th>
                   <th>Visibility</th>
@@ -48,21 +74,21 @@ export function toolsPage() {
                         <span class="tool-icon">${tool.icon}</span>
                         <div>
                           <strong>${tool.name}</strong><br>
-                          <span class="muted small">/${tool.slug} · ${tool.description}</span>
+                          <span class="vw-text-muted vw-text-sm">/${tool.slug} · ${tool.description}</span>
                         </div>
                       </div>
                     </td>
                     <td>${badge(tool.status)}</td>
                     <td>${badge(tool.visibility)}</td>
                     <td><span data-toggle-featured="${tool.id}">${switchEl(tool.featured, `Toggle featured for ${tool.name}`)}</span></td>
-                    <td><span class="muted small">Draft v${tool.draftVersion} · Published v${tool.publishedVersion}</span></td>
-                    <td><span class="muted small">${tool.apiEndpoints.join(", ") || "None yet"}</span></td>
-                    <td><span class="muted small">${tool.featureFlags.join(", ")}</span></td>
+                    <td><span class="vw-text-muted vw-text-sm">Draft v${tool.draftVersion} · Published v${tool.publishedVersion}</span></td>
+                    <td><span class="vw-text-muted vw-text-sm">${tool.apiEndpoints.join(", ") || "None yet"}</span></td>
+                    <td><span class="vw-text-muted vw-text-sm">${tool.featureFlags.join(", ")}</span></td>
                     <td>
-                      <div class="page-actions">
-                        <a class="btn btn-ghost" href="/dashboard/tools/edit?id=${tool.id}" data-route>Edit</a>
-                        <button class="btn btn-ghost" data-duplicate-tool="${tool.id}">Duplicate</button>
-                        <button class="btn btn-ghost" data-archive-tool="${tool.id}">Archive</button>
+                      <div style="display: flex; gap: var(--vw-space-2);">
+                        ${Button({ label: "Edit", href: `/dashboard/tools/edit?id=${tool.id}`, variant: "ghost" })}
+                        ${Button({ label: "Duplicate", variant: "ghost", extraAttrs: `data-duplicate-tool="${tool.id}"` })}
+                        ${Button({ label: "Archive", variant: "ghost", extraAttrs: `data-archive-tool="${tool.id}"` })}
                       </div>
                     </td>
                   </tr>
@@ -70,11 +96,11 @@ export function toolsPage() {
               </tbody>
             </table>
           </div>
-        </section>
-      `);
+        </div>
+        </div>
+      `;
     },
     afterRender: () => {
-      bindLayout();
       document.getElementById("tool-filter")?.addEventListener("change", (event) => {
         filter = event.target.value;
         window.dispatchEvent(new PopStateEvent("popstate"));
@@ -84,15 +110,15 @@ export function toolsPage() {
           title: "Publish config snapshot",
           body: `
             <form id="publish-modal-form">
-              <div class="field wide">
-                <label>Publish Notes</label>
-                <input class="input" name="notes" placeholder="e.g. updated tool limits or category" required>
+              <div class="vw-field">
+                <label class="vw-label">Publish Notes</label>
+                <input class="vw-input" name="notes" placeholder="e.g. updated tool limits or category" required>
               </div>
             </form>
           `,
           actions: `
-            <button class="btn btn-primary" id="publish-ok-btn">Publish</button>
-            <button class="btn btn-ghost" data-close-modal>Cancel</button>
+            ${Button({ label: "Publish", variant: "primary", extraAttrs: 'id="publish-ok-btn"' })}
+            ${Button({ label: "Cancel", variant: "ghost", extraAttrs: 'data-close-modal' })}
           `
         });
 

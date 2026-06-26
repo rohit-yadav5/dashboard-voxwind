@@ -1,7 +1,8 @@
 export const session = {
   isAuthenticated: false,
   user: null,
-  permissions: []
+  permissions: [],
+  activeSite: null
 };
 
 export async function initializeSession() {
@@ -43,4 +44,29 @@ export function requirePermission(permission) {
   return { ok: true };
 }
 
+export function setActiveSite(site) {
+  session.activeSite = {
+    id: site.id,
+    slug: site.slug,
+    displayName: site.display_name || site.displayName || site.name,
+    primaryDomain: site.primary_domain || site.primaryDomain || null,
+    status: site.status,
+    permissions: site.permissions || []
+  };
+  localStorage.setItem("vw_active_site", JSON.stringify(session.activeSite));
+  document.dispatchEvent(new CustomEvent("site:changed", { detail: session.activeSite }));
+}
 
+export function loadActiveSite() {
+  try {
+    const cached = localStorage.getItem("vw_active_site");
+    if (cached) {
+      session.activeSite = JSON.parse(cached);
+    }
+  } catch (err) {
+    console.error("Failed to load active site from cache", err);
+  }
+}
+
+// Call load automatically on init
+loadActiveSite();

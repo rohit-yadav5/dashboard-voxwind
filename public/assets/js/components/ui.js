@@ -1,60 +1,53 @@
-export function pageHead(title, subtitle, actions = "") {
+import { getIcon } from "../core/icons.js";
+
+// Typography & Headers
+export function PageHeader({ title, subtitle, actions = "" }) {
   return `
-    <div class="page-head">
-      <div class="page-title">
-        <h1>${title}</h1>
-        <p>${subtitle}</p>
+    <div class="vw-page-header">
+      <div>
+        <h1 class="vw-h1">${title}</h1>
+        ${subtitle ? `<p class="vw-text-muted" style="margin-top: 8px;">${subtitle}</p>` : ""}
       </div>
-      ${actions ? `<div class="page-actions">${actions}</div>` : ""}
+      ${actions ? `<div class="vw-page-actions">${actions}</div>` : ""}
     </div>
   `;
 }
 
-export function metric(label, value, note = "") {
+// Buttons
+export function Button({ label, icon = "", variant = "primary", disabled = false, href = "", extraAttrs = "" }) {
+  const inner = `${icon ? getIcon(icon) : ""}${label}`;
+  const classes = `vw-btn vw-btn-${variant}`;
+  
+  if (href) {
+    return `<a href="${href}" class="${classes}" data-route ${extraAttrs}>${inner}</a>`;
+  }
+  return `<button class="${classes}" ${disabled ? "disabled" : ""} ${extraAttrs}>${inner}</button>`;
+}
+
+export function IconButton({ icon, label = "", extraAttrs = "" }) {
   return `
-    <article class="metric-card card">
-      <div class="metric-label">${label}</div>
-      <div class="metric-value">${value}</div>
-      ${note ? `<div class="metric-note">${note}</div>` : ""}
-    </article>
+    <button class="vw-icon-btn" aria-label="${label}" ${extraAttrs}>
+      ${getIcon(icon)}
+    </button>
   `;
 }
 
-export function badge(value, tone = "") {
-  return `<span class="badge ${tone || String(value).toLowerCase()}">${value}</span>`;
+// Data Display
+export function Badge({ label, tone = "default" }) {
+  // tone: success, warning, danger, default
+  const toneClass = tone !== "default" ? `vw-badge-${tone}` : "";
+  return `<span class="vw-badge ${toneClass}">${label}</span>`;
 }
 
-export function switchEl(on, label) {
-  return `<button class="switch ${on ? "on" : ""}" type="button" aria-label="${label}" aria-pressed="${on ? "true" : "false"}"></button>`;
+export function Avatar({ initial = "V" }) {
+  return `<div class="vw-avatar">${initial}</div>`;
 }
 
-export function section(title, subtitle, body, actions = "") {
+// Toast Notification
+export function Toast({ message, type = "info" }) {
   return `
-    <section class="panel">
-      <div class="section-title">
-        <div>
-          <h2>${title}</h2>
-          ${subtitle ? `<p>${subtitle}</p>` : ""}
-        </div>
-        ${actions}
-      </div>
-      ${body}
-    </section>
-  `;
-}
-
-export function chart(values) {
-  const max = Math.max(...values, 1);
-  return `<div class="chart-bars">${values.map((value) => (
-    `<div class="chart-bar" style="height:${Math.max(8, (value / max) * 100)}%" title="${value}"></div>`
-  )).join("")}</div>`;
-}
-
-export function forbidden() {
-  return `
-    <div class="empty-state">
-      <h2 style="margin-top:0">Permission required</h2>
-      <p>This role does not have permission to access this route.</p>
+    <div class="toast toast-${type}">
+      ${message}
     </div>
   `;
 }
