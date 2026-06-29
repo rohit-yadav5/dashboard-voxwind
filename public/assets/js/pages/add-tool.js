@@ -63,10 +63,10 @@ export function addToolPage() {
         const input = normalizeToolPayload(raw);
         try {
           await createTool(input);
-          toast("Tool draft saved successfully");
+          toast("Tool draft saved successfully", "success");
           navigate("/dashboard/tools");
         } catch (err) {
-          toast(err.message || "Failed to create tool draft");
+          toast(err.message || "Failed to create tool draft", "error");
         }
       });
       document.getElementById("preview-config")?.addEventListener("click", () => {

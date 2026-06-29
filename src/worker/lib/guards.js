@@ -38,8 +38,25 @@ export async function requireAdmin(request, env) {
   let userContext;
   try {
     userContext = await getUserContext(env.DB, authUser.id);
+    if ((!userContext || !userContext.roles || !userContext.roles.length) && env.APP_ENV === "development") {
+      console.log(`Auto-bootstrapping development user: ${authUser.email} (${authUser.id})`);
+      const now = Math.floor(Date.now() / 1000);
+      
+      // First insert/update the user
+      await env.DB.prepare(
+        `INSERT OR IGNORE INTO users (id, email, display_name, status, created_at, updated_at) VALUES (?, ?, ?, 'active', ?, ?)`
+      ).bind(authUser.id, authUser.email, authUser.display_name || authUser.email.split("@")[0], now, now).run();
+      
+      // Then assign role_owner
+      await env.DB.prepare(
+        `INSERT OR IGNORE INTO user_roles (user_id, role_id, assigned_by, assigned_at) VALUES (?, 'role_owner', 'system', ?)`
+      ).bind(authUser.id, now).run();
+      
+      // Query userContext again
+      userContext = await getUserContext(env.DB, authUser.id);
+    }
   } catch (err) {
-    console.error("getUserContext failed", err);
+    console.error("getUserContext/bootstrapping failed", err);
     return { ok: false, status: 500, error: "Database error during authorization check" };
   }
 

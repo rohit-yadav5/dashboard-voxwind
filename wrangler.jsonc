@@ -3,6 +3,9 @@
 	"name": "dashboard-voxwind",
 	"main": "src/worker/index.js",
 	"compatibility_date": "2026-05-26",
+	"dev": {
+		"port": 8788
+	},
 	"compatibility_flags": [
 		"nodejs_compat"
 	],

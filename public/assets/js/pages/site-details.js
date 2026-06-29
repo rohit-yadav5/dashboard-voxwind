@@ -2,21 +2,22 @@ import { getSite, listSiteResources, syncSiteResources } from "../services/admin
 import { PageHeader, Badge, Button } from "../components/ui.js";
 import { SkeletonLoader, EmptyState } from "../components/feedback.js";
 import { getIcon } from "../core/icons.js";
+import { toast } from "../components/toast.js";
 
 function renderResourceGroup(provider, type, resources) {
   const cards = resources.map(res => {
     let metaHtml = "";
     if (res.metadata) {
       metaHtml = Object.entries(res.metadata).map(([k, v]) => `
-        <div style="font-size: 11px; color: var(--vw-text-muted);">
-          <span style="text-transform: capitalize;">${k.replace(/_/g, ' ')}</span>: <span style="color: var(--vw-text);">${v}</span>
+        <div style="font-size: 11px; color: var(--vw-text-muted); margin-top: 4px;">
+          <span style="text-transform: capitalize; font-weight: 500;">${k.replace(/_/g, ' ')}</span>: <span style="color: var(--vw-text); font-family: var(--vw-font-mono);">${v}</span>
         </div>
       `).join('');
     }
 
     return `
-      <div class="vw-card" style="padding: var(--vw-space-3);">
-        <div style="font-weight: 500; color: var(--vw-text); font-size: 14px; margin-bottom: var(--vw-space-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${res.resource_name}">
+      <div class="vw-card" style="padding: var(--vw-space-3); background: var(--vw-bg);">
+        <div style="font-weight: 600; color: var(--vw-text); font-size: 13px; margin-bottom: var(--vw-space-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${res.resource_name}">
           ${res.resource_name}
         </div>
         ${metaHtml}
@@ -26,8 +27,8 @@ function renderResourceGroup(provider, type, resources) {
 
   return `
     <div style="margin-bottom: var(--vw-space-5);">
-      <h3 class="vw-h3" style="text-transform: capitalize; margin-bottom: var(--vw-space-3); font-size: 14px; color: var(--vw-text-muted); border-bottom: 1px solid var(--vw-border); padding-bottom: 8px;">
-        ${type === 'd1' ? 'D1 Databases' : type === 'kv' ? 'KV Namespaces' : type + 's'}
+      <h3 class="vw-h3" style="text-transform: capitalize; margin-bottom: var(--vw-space-3); font-size: 13px; color: var(--vw-text-muted); border-bottom: 1px solid var(--vw-border); padding-bottom: var(--vw-space-2); display: flex; align-items: center; gap: 8px;">
+        <span>${type === 'd1' ? 'D1 Databases' : type === 'kv' ? 'KV Namespaces' : type + 's'}</span>
         ${Badge({ label: resources.length, tone: "default" })}
       </h3>
       <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--vw-space-3);">
@@ -52,9 +53,12 @@ export function siteDetailsPage(idOrSlug) {
     if (currentTab === "overview") {
       return `
         <div class="vw-card" style="margin-top: var(--vw-space-4);">
-          <h2 class="vw-h2">Overview</h2>
-          <p class="vw-text-muted" style="margin-top: var(--vw-space-2);">Site ID: ${site.id}</p>
-          <p class="vw-text-muted">Slug: ${site.slug}</p>
+          <h3 class="vw-h3" style="margin-bottom: var(--vw-space-3); font-weight: 600;">Workspace Identity</h3>
+          <div style="display: grid; gap: var(--vw-space-3); font-size: 13px;">
+            <div><span style="color: var(--vw-text-muted); font-weight: 500;">Site ID:</span> <code style="font-family: var(--vw-font-mono); color: var(--vw-text);">${site.id}</code></div>
+            <div><span style="color: var(--vw-text-muted); font-weight: 500;">Unique Slug:</span> <code style="font-family: var(--vw-font-mono); color: var(--vw-text);">${site.slug}</code></div>
+            <div><span style="color: var(--vw-text-muted); font-weight: 500;">Domain Configured:</span> <span style="color: var(--vw-text);">${site.primary_domain || 'None'}</span></div>
+          </div>
         </div>
       `;
     }
@@ -81,7 +85,10 @@ export function siteDetailsPage(idOrSlug) {
 
       providers.forEach(provider => {
         infraHtml += `<div class="vw-card" style="margin-bottom: var(--vw-space-5); padding: var(--vw-space-4);">`;
-        infraHtml += `<h2 class="vw-h2" style="margin-bottom: var(--vw-space-4); text-transform: capitalize; display: flex; align-items: center; gap: 8px;">${getIcon("Cloud")} ${provider}</h2>`;
+        infraHtml += `<h2 class="vw-h2" style="margin-bottom: var(--vw-space-4); text-transform: capitalize; display: flex; align-items: center; gap: 8px;">
+          <span style="display: flex; align-items: center; color: var(--vw-text-subtle);">${getIcon("Cloud")}</span>
+          <span style="font-weight: 600;">${provider}</span>
+        </h2>`;
         
         const providerRes = resources.filter(r => r.provider === provider);
         const types = [...new Set(providerRes.map(r => r.resource_type))];
@@ -136,9 +143,9 @@ export function siteDetailsPage(idOrSlug) {
           ${PageHeader({ title: "Loading...", subtitle: "Fetching workspace details..." })}
         </div>
         
-        <div id="site-tabs-container" class="vw-tabs" style="margin-top: var(--vw-space-4); border-bottom: 1px solid var(--vw-border); display: flex; gap: var(--vw-space-4);">
-          <button class="vw-tab ${currentTab === 'overview' ? 'active' : ''}" data-tab="overview" style="background: none; border: none; padding: 8px 0; cursor: pointer; color: ${currentTab === 'overview' ? 'var(--vw-primary)' : 'var(--vw-text-muted)'}; font-weight: 500; border-bottom: 2px solid ${currentTab === 'overview' ? 'var(--vw-primary)' : 'transparent'};">Overview</button>
-          <button class="vw-tab ${currentTab === 'infrastructure' ? 'active' : ''}" data-tab="infrastructure" style="background: none; border: none; padding: 8px 0; cursor: pointer; color: ${currentTab === 'infrastructure' ? 'var(--vw-primary)' : 'var(--vw-text-muted)'}; font-weight: 500; border-bottom: 2px solid ${currentTab === 'infrastructure' ? 'var(--vw-primary)' : 'transparent'};">Infrastructure</button>
+        <div id="site-tabs-container" class="vw-tabs" style="margin-top: var(--vw-space-4);">
+          <button class="vw-tab ${currentTab === 'overview' ? 'active' : ''}" data-tab="overview">Overview</button>
+          <button class="vw-tab ${currentTab === 'infrastructure' ? 'active' : ''}" data-tab="infrastructure">Infrastructure</button>
         </div>
 
         <div id="site-details-content" style="margin-top: var(--vw-space-4);">
@@ -152,11 +159,9 @@ export function siteDetailsPage(idOrSlug) {
         if (tabBtn) {
           currentTab = tabBtn.getAttribute("data-tab");
           document.querySelectorAll(".vw-tab").forEach(t => {
-            t.style.color = "var(--vw-text-muted)";
-            t.style.borderBottomColor = "transparent";
+            t.classList.remove("active");
           });
-          tabBtn.style.color = "var(--vw-primary)";
-          tabBtn.style.borderBottomColor = "var(--vw-primary)";
+          tabBtn.classList.add("active");
           reRender();
         }
       });
@@ -169,8 +174,9 @@ export function siteDetailsPage(idOrSlug) {
           try {
             await syncSiteResources(site.id, "cloudflare");
             resources = await listSiteResources(site.id);
+            toast("Infrastructure sync successful", "success");
           } catch (err) {
-            toast("Sync failed: " + err.message);
+            toast("Sync failed: " + err.message, "error");
           } finally {
             isSyncing = false;
             reRender();

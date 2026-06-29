@@ -6,10 +6,14 @@ export function json(body, request, env, init = {}) {
   headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
 
   const origin = request.headers.get("Origin");
-  if (origin && origin === env.DASHBOARD_ORIGIN) {
-    headers.set("Access-Control-Allow-Origin", origin);
-    headers.set("Access-Control-Allow-Credentials", "true");
-    headers.set("Vary", "Origin");
+  if (origin) {
+    const allowed = env.DASHBOARD_ORIGIN || "https://dashboard.voxwind.com";
+    const isDev = env.APP_ENV === "development" && (origin.startsWith("http://localhost:") || origin.startsWith("http://127.0.0.1:"));
+    if (origin === allowed || isDev) {
+      headers.set("Access-Control-Allow-Origin", origin);
+      headers.set("Access-Control-Allow-Credentials", "true");
+      headers.set("Vary", "Origin");
+    }
   }
 
   return new Response(JSON.stringify(body), {

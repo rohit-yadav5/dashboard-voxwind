@@ -11,76 +11,90 @@ export function Sidebar() {
   const navItems = getVisibleNavigation(permissions);
   const sections = [...new Set(navItems.map(i => i.section))];
   
-  const siteName = session.activeSite ? session.activeSite.displayName : "VoxWind Console";
+  const siteName = session.activeSite ? (session.activeSite.displayName || session.activeSite.name) : "VoxWind Console";
   const siteDomain = session.activeSite?.primaryDomain || "Select a workspace";
 
   return `
     <aside class="vw-sidebar" id="sidebar">
       <!-- Site Switcher -->
-      <a href="/dashboard/sites" data-route class="vw-sidebar-brand" style="cursor: pointer; padding: 16px; display: flex; align-items: center; justify-content: space-between; text-decoration: none; color: inherit;">
-        <div style="display: flex; align-items: center; gap: 12px; overflow: hidden;">
-          <div class="vw-avatar" style="border-radius: 6px; flex-shrink: 0; background: var(--vw-primary); color: white;">
+      <a href="/dashboard/sites" data-route class="vw-sidebar-header">
+        <div class="vw-sidebar-header-info">
+          <div class="vw-avatar vw-avatar-sm" style="background: var(--vw-gray-800); color: #ffffff;">
             ${siteName.charAt(0).toUpperCase()}
           </div>
-          <div style="overflow: hidden; text-align: left;">
-            <div class="vw-brand-title" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${siteName}</div>
-            <div style="font-size: 11px; color: var(--vw-text-muted);">${siteDomain}</div>
+          <div class="vw-sidebar-header-text">
+            <div class="vw-brand-title">${siteName}</div>
+            <div class="vw-brand-subtitle">${siteDomain}</div>
           </div>
         </div>
-        ${getIcon("ChevronsUpDown")}
+        <div style="color: var(--vw-text-muted); flex-shrink: 0;">
+          ${getIcon("ChevronsUpDown")}
+        </div>
       </a>
       
       <!-- Navigation -->
-      <nav class="vw-sidebar-nav" style="flex: 1; overflow-y: auto;">
+      <nav class="vw-sidebar-nav">
         ${sections.map(section => `
-          <div class="vw-nav-section">
-            <div class="vw-nav-title">${section}</div>
-            ${navItems.filter(item => item.section === section).map(item => `
-              <a href="${item.route}" data-route class="vw-nav-item ${path === item.route ? 'active' : ''}">
-                ${getIcon(item.icon)}
-                <span>${item.title}</span>
-              </a>
-            `).join('')}
-          </div>
+          <details class="vw-nav-details" open>
+            <summary class="vw-nav-title">
+              <span>${section}</span>
+              ${getIcon("ChevronDown")}
+            </summary>
+            <div class="vw-nav-group">
+              ${navItems.filter(item => item.section === section).map(item => `
+                <a href="${item.route}" data-route class="vw-nav-item ${path === item.route ? 'active' : ''}">
+                  ${getIcon(item.icon)}
+                  <span>${item.title}</span>
+                </a>
+              `).join('')}
+            </div>
+          </details>
         `).join('')}
       </nav>
 
       <!-- User Profile -->
-      <div style="position: relative; border-top: 1px solid var(--vw-border);">
-        <div id="profile-trigger" style="padding: 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: background 0.2s;">
-          <div class="vw-avatar" style="flex-shrink: 0;">${session.user ? session.user.displayName?.charAt(0).toUpperCase() || 'U' : 'U'}</div>
-          <div style="overflow: hidden; flex: 1; text-align: left;">
-            <div style="font-size: 13px; font-weight: 500; color: var(--vw-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-              ${session.user ? session.user.displayName || session.user.email : 'Guest'}
+      <div class="vw-sidebar-footer">
+        <button id="profile-trigger" class="vw-profile-trigger" aria-haspopup="true" aria-expanded="false">
+          <div class="vw-profile-info">
+            <div class="vw-avatar vw-avatar-sm" style="background: var(--vw-surface-hover); color: var(--vw-gray-800); border: 1px solid var(--vw-border);">
+              ${session.user ? (session.user.displayName || session.user.email || 'U').charAt(0).toUpperCase() : 'U'}
             </div>
-            <div style="font-size: 11px; color: var(--vw-text-muted);">
-              ${session.user ? session.user.role : 'Read-only'}
+            <div class="vw-profile-text">
+              <div class="vw-profile-name">
+                ${session.user ? (session.user.displayName || session.user.email) : 'Guest'}
+              </div>
+              <div class="vw-profile-role">
+                ${session.user ? session.user.role : 'Read-only'}
+              </div>
             </div>
           </div>
-          ${getIcon("ChevronUp")}
-        </div>
+          <div style="color: var(--vw-text-muted); flex-shrink: 0;">
+            ${getIcon("ChevronsUpDown")}
+          </div>
+        </button>
         
         <!-- Profile Dropdown -->
-        <div id="profile-dropdown" style="display: none; position: absolute; bottom: 100%; left: 16px; right: 16px; background: var(--vw-surface); border: 1px solid var(--vw-border); border-radius: var(--vw-radius-md); box-shadow: var(--vw-shadow-lg); z-index: 10; margin-bottom: 8px; padding: 8px; flex-direction: column; gap: 4px;">
-          <div style="padding: 8px 12px; border-bottom: 1px solid var(--vw-border); margin-bottom: 4px; text-align: left;">
-            <div style="font-weight: 600; color: var(--vw-text); font-size: 13px;">${session.user ? session.user.displayName || session.user.email : 'Guest'}</div>
-            <div style="font-size: 11px; color: var(--vw-text-muted); word-break: break-all; margin-top: 2px;">${session.user ? session.user.email : ''}</div>
-            <div style="margin-top: 6px;">
-              ${Badge({ label: session.user ? session.user.role : 'Guest', tone: 'default' })}
-            </div>
+        <div id="profile-dropdown" class="vw-dropdown open-up">
+          <div class="vw-dropdown-header">
+            <div class="vw-dropdown-title">${session.user ? (session.user.displayName || session.user.email) : 'Guest'}</div>
+            <div class="vw-dropdown-subtitle">${session.user ? session.user.email : ''}</div>
           </div>
-          ${Button({ label: "Manage Account", href: "/dashboard/settings", variant: "ghost", extraAttrs: 'style="justify-content: flex-start; min-height: 32px; padding: 0 8px; font-size: 13px; width: 100%;"' })}
-          <button id="profile-settings-btn" class="vw-btn vw-btn-ghost" style="justify-content: flex-start; min-height: 32px; padding: 0 8px; font-size: 13px; width: 100%; cursor: pointer;">
-            ${getIcon("Sliders")} Profile Settings
-          </button>
-          <button id="sign-out-btn" class="vw-btn vw-btn-ghost" style="justify-content: flex-start; min-height: 32px; padding: 0 8px; font-size: 13px; width: 100%; color: var(--vw-danger); cursor: pointer;">
-            ${getIcon("LogOut")} Sign Out
+          <a href="/dashboard/settings" data-route class="vw-dropdown-item">
+            ${getIcon("User")} <span>Account Settings</span>
+          </a>
+          <a href="/dashboard/settings" data-route class="vw-dropdown-item">
+            ${getIcon("Settings")} <span>Platform Settings</span>
+          </a>
+          <div class="vw-dropdown-divider"></div>
+          <button id="sign-out-btn" class="vw-dropdown-item danger">
+            ${getIcon("LogOut")} <span>Sign Out</span>
           </button>
         </div>
       </div>
     </aside>
   `;
 }
+
 let isDropdownClickBound = false;
 
 export function bindSidebar() {
@@ -89,24 +103,30 @@ export function bindSidebar() {
   if (trigger && dropdown) {
     trigger.addEventListener("click", (e) => {
       e.stopPropagation();
-      const isVisible = dropdown.style.display === "flex";
-      dropdown.style.display = isVisible ? "none" : "flex";
+      const isVisible = dropdown.classList.contains("open");
+      if (isVisible) {
+        dropdown.classList.remove("open");
+        trigger.setAttribute("aria-expanded", "false");
+      } else {
+        dropdown.classList.add("open");
+        trigger.setAttribute("aria-expanded", "true");
+      }
     });
   }
 
   if (!isDropdownClickBound) {
     document.addEventListener("click", () => {
       const dropdown = document.getElementById("profile-dropdown");
-      if (dropdown) {
-        dropdown.style.display = "none";
+      const trigger = document.getElementById("profile-trigger");
+      if (dropdown && dropdown.classList.contains("open")) {
+        dropdown.classList.remove("open");
+      }
+      if (trigger) {
+        trigger.setAttribute("aria-expanded", "false");
       }
     });
     isDropdownClickBound = true;
   }
-
-  document.getElementById("profile-settings-btn")?.addEventListener("click", () => {
-    toast("Profile settings are currently under development.");
-  });
 
   document.getElementById("sign-out-btn")?.addEventListener("click", async () => {
     try {
@@ -114,13 +134,13 @@ export function bindSidebar() {
       if (res.ok) {
         localStorage.clear();
         sessionStorage.clear();
-        toast("Signed out successfully");
+        toast("Signed out successfully", "success");
         window.location.href = "/login";
       } else {
-        toast("Sign out failed");
+        toast("Sign out failed", "error");
       }
     } catch (err) {
-      toast("Sign out failed: " + err.message);
+      toast("Sign out failed: " + err.message, "error");
     }
   });
 }

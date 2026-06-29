@@ -1,5 +1,5 @@
 /* ============================================
-   APP SHELL
+   VOXWIND APP SHELL SYSTEM
    ============================================ */
 
 html, body {
@@ -10,19 +10,26 @@ html, body {
   color: var(--vw-text);
   font-family: var(--vw-font-sans);
   font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scrollbar-gutter: stable;
 }
 
-*, *::before, *::after { box-sizing: border-box; }
+*, *::before, *::after {
+  box-sizing: border-box;
+}
 
+/* App Shell container */
 .vw-app-shell {
   display: flex;
   min-height: 100vh;
 }
 
-/* Sidebar */
+/* 1. Sidebar Component */
 .vw-sidebar {
-  width: 260px;
-  background: var(--vw-surface);
+  width: 230px;
+  background: var(--vw-bg);
   border-right: 1px solid var(--vw-border);
   display: flex;
   flex-direction: column;
@@ -33,30 +40,57 @@ html, body {
   transition: transform var(--vw-transition-base);
 }
 
-.vw-sidebar-brand {
-  height: 60px;
+.vw-sidebar-header {
+  height: 56px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: var(--vw-space-3);
-  padding: 0 var(--vw-space-4);
+  padding: 0 var(--vw-space-3);
   border-bottom: 1px solid var(--vw-border);
+  transition: background var(--vw-transition-fast);
+  text-decoration: none;
+  color: inherit;
 }
 
-.vw-brand-logo {
-  width: 24px;
-  height: 24px;
-  background: var(--vw-text);
-  color: var(--vw-bg);
-  display: grid;
-  place-items: center;
-  border-radius: 4px;
-  font-weight: 700;
-  font-size: 12px;
+.vw-sidebar-header:hover {
+  background: var(--vw-surface-hover);
 }
+
+.vw-sidebar-header-info {
+  display: flex;
+  align-items: center;
+  gap: var(--vw-space-2);
+  overflow: hidden;
+  min-width: 0;
+  flex: 1;
+}
+
+.vw-sidebar-header-text {
+  overflow: hidden;
+  text-align: left;
+  min-width: 0;
+  flex: 1;
+}
+
 .vw-brand-title {
   font-weight: 600;
-  font-size: 15px;
-  color: var(--vw-text);
+  font-size: 13px;
+  color: var(--vw-gray-800);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.vw-brand-subtitle {
+  font-size: 11px;
+  color: var(--vw-text-muted);
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
 }
 
 .vw-sidebar-nav {
@@ -68,44 +102,145 @@ html, body {
   gap: var(--vw-space-4);
 }
 
-.vw-nav-section {
+/* Sidebar nav sections */
+.vw-sidebar-footer {
+  position: relative;
+  padding: var(--vw-space-3);
+  border-top: 1px solid var(--vw-border);
+  background: var(--vw-bg);
+  margin-top: auto;
+}
+
+.vw-profile-trigger {
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: var(--vw-space-2);
+  border-radius: var(--vw-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--vw-space-2);
+  cursor: pointer;
+  transition: background var(--vw-transition-fast);
+  outline: none;
+}
+
+.vw-profile-trigger:hover,
+.vw-profile-trigger[aria-expanded="true"] {
+  background: var(--vw-surface-hover);
+}
+
+.vw-profile-info {
+  display: flex;
+  align-items: center;
+  gap: var(--vw-space-2);
+  overflow: hidden;
+  min-width: 0;
+  flex: 1;
+  text-align: left;
+}
+
+.vw-profile-text {
+  overflow: hidden;
+  min-width: 0;
+  flex: 1;
+}
+
+.vw-profile-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--vw-gray-800);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.vw-profile-role {
+  font-size: 11px;
+  color: var(--vw-text-muted);
+  margin-top: 2px;
+}
+
+.vw-nav-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.vw-nav-details summary {
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+}
+.vw-nav-details summary::-webkit-details-marker {
+  display: none;
+}
+.vw-nav-group {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  margin-top: 4px;
 }
 
 .vw-nav-title {
   font-size: 11px;
   font-weight: 600;
+  color: var(--vw-text-muted);
+  padding: 4px var(--vw-space-3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--vw-text-subtle);
-  padding: 0 var(--vw-space-3) var(--vw-space-2);
+  transition: color var(--vw-transition-fast);
+}
+.vw-nav-title:hover {
+  color: var(--vw-gray-800);
+}
+.vw-nav-title svg {
+  width: 14px;
+  height: 14px;
+  transition: transform var(--vw-transition-base);
+}
+.vw-nav-details[open] .vw-nav-title svg {
+  transform: rotate(180deg);
 }
 
+/* Navigation items */
 .vw-nav-item {
   display: flex;
   align-items: center;
   gap: var(--vw-space-3);
-  padding: 8px var(--vw-space-3);
+  padding: 6px var(--vw-space-3);
   border-radius: var(--vw-radius-sm);
   color: var(--vw-text-muted);
   text-decoration: none;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
-  transition: var(--vw-transition-fast);
+  transition: background var(--vw-transition-fast), color var(--vw-transition-fast);
 }
-
-.vw-nav-item:hover, .vw-nav-item.active {
+.vw-nav-item:hover {
+  color: var(--vw-gray-800);
   background: var(--vw-surface-hover);
-  color: var(--vw-text);
+}
+.vw-nav-item.active {
+  color: var(--vw-gray-800);
+  background: var(--vw-gray-100);
+  font-weight: 500;
 }
 .vw-nav-item svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
+  color: var(--vw-text-muted);
+  transition: color var(--vw-transition-fast);
+}
+.vw-nav-item:hover svg, .vw-nav-item.active svg {
+  color: var(--vw-gray-800);
 }
 
-/* Main Area */
+/* 2. Main Content Layout */
 .vw-main-area {
   flex: 1;
   display: flex;
@@ -113,33 +248,117 @@ html, body {
   min-width: 0;
 }
 
-/* Topbar */
+/* 3. Topbar Component */
 .vw-topbar {
-  height: 60px;
-  background: var(--vw-bg);
+  height: 56px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--vw-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 var(--vw-space-5);
+  padding: 0 var(--vw-space-6);
   position: sticky;
   top: 0;
   z-index: var(--vw-z-sticky);
 }
 
-.vw-topbar-left, .vw-topbar-right {
+.vw-topbar-left, 
+.vw-topbar-right, 
+.vw-topbar-center {
   display: flex;
   align-items: center;
-  gap: var(--vw-space-3);
+  flex: 1;
+}
+
+.vw-topbar-left {
+  justify-content: flex-start;
+}
+
+.vw-topbar-center {
+  justify-content: center;
+}
+
+.vw-topbar-right {
+  justify-content: flex-end;
+  gap: var(--vw-space-2);
+}
+
+.vw-topbar-search {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--vw-space-4);
+  width: 320px;
+  max-width: 100%;
+  height: 32px;
+  padding: 0 var(--vw-space-2);
+  background: var(--vw-surface-hover);
+  border: 1px solid var(--vw-border);
+  border-radius: var(--vw-radius-md);
+  color: var(--vw-text-muted);
+  cursor: pointer;
+  transition: background var(--vw-transition-fast), border-color var(--vw-transition-fast);
+  outline: none;
+}
+
+.vw-topbar-search:hover {
+  border-color: var(--vw-border-hover);
+}
+
+.vw-topbar-search-inner {
+  display: flex;
+  align-items: center;
+  gap: var(--vw-space-2);
+  min-width: 0;
+}
+
+.vw-topbar-search-text {
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--vw-text-muted);
+}
+
+.vw-topbar-search-kbd {
+  font-family: var(--vw-font-sans);
+  font-size: 11px;
+  background: var(--vw-bg);
+  border: 1px solid var(--vw-border);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--vw-gray-500);
+  font-weight: 500;
+}
+
+.vw-env-selector {
+  position: relative;
+}
+
+.vw-env-trigger {
+  height: 32px;
+  min-height: 32px;
+  padding: 0 var(--vw-space-2);
+  gap: 6px;
+  border-radius: var(--vw-radius-sm);
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--vw-gray-800);
 }
 
 .vw-mobile-toggle {
   display: none;
+  background: transparent;
+  border: none;
+  color: var(--vw-gray-800);
+  cursor: pointer;
 }
 
-/* Content */
+/* 4. Page Content Structure */
 .vw-content-wrapper {
-  padding: var(--vw-space-6) var(--vw-space-5);
+  padding: var(--vw-space-6) var(--vw-space-6) var(--vw-space-12);
   max-width: 1200px;
   width: 100%;
   margin: 0 auto;
@@ -152,17 +371,88 @@ html, body {
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--vw-space-4);
+  padding-bottom: var(--vw-space-4);
 }
 
-/* Responsive */
+.vw-page-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--vw-gray-800);
+  margin: 0 0 4px 0;
+  letter-spacing: -0.02em;
+}
+
+.vw-page-subtitle {
+  font-size: 14px;
+  color: var(--vw-text-muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.vw-page-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--vw-space-3);
+}
+
+/* 5. Grid Systems */
+.vw-grid {
+  display: grid;
+  gap: var(--vw-space-4);
+}
+.vw-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--vw-space-4);
+}
+.vw-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--vw-space-4);
+}
+.vw-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--vw-space-4);
+}
+.vw-grid-auto {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--vw-space-4);
+}
+
+/* Grid responsive fallbacks */
+@media (max-width: 1024px) {
+  .vw-grid-4 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+  .vw-grid-3, .vw-grid-4, .vw-grid-2 { grid-template-columns: 1fr; }
+}
+
+/* 6. Responsive Styles */
 @media (max-width: 820px) {
   .vw-sidebar {
     position: fixed;
     transform: translateX(-100%);
     box-shadow: var(--vw-shadow-lg);
+    height: 100vh;
   }
   .vw-sidebar.open {
     transform: translateX(0);
+  }
+  .vw-sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(2px);
+    z-index: calc(var(--vw-z-sticky) - 1);
+    opacity: 0;
+    transition: opacity var(--vw-transition-base);
+  }
+  .vw-sidebar-overlay.open {
+    display: block;
+    opacity: 1;
   }
   .vw-mobile-toggle {
     display: inline-flex;
@@ -171,6 +461,14 @@ html, body {
     padding: 0 var(--vw-space-4);
   }
   .vw-content-wrapper {
-    padding: var(--vw-space-4);
+    padding: var(--vw-space-4) var(--vw-space-4) var(--vw-space-10);
+  }
+  .vw-page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .vw-page-actions {
+    margin-top: var(--vw-space-2);
+    justify-content: flex-start;
   }
 }

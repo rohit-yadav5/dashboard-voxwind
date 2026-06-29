@@ -1,90 +1,211 @@
 /* ============================================
-   COMPONENT LIBRARY
+   VOXWIND CONSOLE COMPONENT LIBRARY
    ============================================ */
 
-/* Typography Utils */
-.vw-heading { font-weight: 600; color: var(--vw-text); margin: 0; }
-.vw-h1 { font-size: 24px; line-height: 1.2; }
-.vw-h2 { font-size: 18px; line-height: 1.3; }
-.vw-h3 { font-size: 16px; line-height: 1.4; }
-.vw-text-muted { color: var(--vw-text-muted); }
-.vw-text-subtle { color: var(--vw-text-subtle); }
-.vw-text-sm { font-size: 13px; }
+/* 1. Typography & Hierarchy Utilities */
+.vw-heading {
+  font-family: var(--vw-font-sans);
+  font-weight: 600;
+  color: var(--vw-gray-800);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+.vw-h1 {
+  font-size: 28px;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+}
+.vw-h2 {
+  font-size: 22px;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  font-weight: 600;
+}
+.vw-h3 {
+  font-size: 16px;
+  line-height: 1.4;
+  font-weight: 600;
+  color: var(--vw-gray-800);
+}
+.vw-text-muted {
+  color: var(--vw-text-muted);
+}
+.vw-text-subtle {
+  color: var(--vw-text-muted);
+}
+.vw-text-sm {
+  font-size: 14px;
+  line-height: 1.5;
+}
+.vw-text-xs {
+  font-size: 12px;
+  line-height: 1.4;
+}
 
-/* Buttons */
+/* Spinner Loader */
+.vw-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(0, 0, 0, 0.15);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  flex-shrink: 0;
+}
+.vw-btn-primary .vw-spinner {
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-top-color: #ffffff;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* 2. Buttons */
 .vw-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--vw-space-2);
-  min-height: 38px;
-  padding: 0 var(--vw-space-4);
+  gap: 8px;
+  padding: 10px 20px;
   font-family: var(--vw-font-sans);
   font-size: 14px;
   font-weight: 500;
+  line-height: 1.2;
   border-radius: var(--vw-radius-sm);
   border: 1px solid transparent;
   cursor: pointer;
   text-decoration: none;
-  transition: var(--vw-transition-fast);
+  transition: opacity var(--vw-transition-fast), border-color var(--vw-transition-fast), background var(--vw-transition-fast), color var(--vw-transition-fast);
+  outline: none;
+  user-select: none;
+  white-space: nowrap;
 }
-.vw-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.vw-btn svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+.vw-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+}
+.vw-btn:focus-visible {
+  box-shadow: var(--vw-focus-ring);
+}
 
+/* Button Sizing */
+.vw-btn-sm {
+  padding: 8px 16px;
+  font-size: 13px;
+  gap: 6px;
+}
+.vw-btn-sm svg {
+  width: 14px;
+  height: 14px;
+}
+.vw-btn-lg {
+  padding: 12px 28px;
+  font-size: 15px;
+}
+.vw-btn-lg svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Button Variants */
 .vw-btn-primary {
-  background: var(--vw-accent);
-  color: var(--vw-accent-text);
+  background: var(--vw-primary);
+  color: var(--vw-primary-text);
 }
-.vw-btn-primary:hover { opacity: 0.85; }
+.vw-btn-primary:hover:not(:disabled) {
+  opacity: 0.85;
+}
+.vw-btn-primary:active:not(:disabled) {
+  opacity: 0.75;
+}
 
-.vw-btn-secondary {
-  background: var(--vw-surface);
-  color: var(--vw-text);
+.vw-btn-secondary, .vw-btn-outline {
+  background: var(--vw-bg);
+  color: var(--vw-gray-800);
   border-color: var(--vw-border);
 }
-.vw-btn-secondary:hover {
-  background: var(--vw-surface-hover);
-  border-color: var(--vw-border-hover);
+.vw-btn-secondary:hover:not(:disabled), .vw-btn-outline:hover:not(:disabled) {
+  border-color: var(--vw-gray-800);
+}
+.vw-btn-secondary:active:not(:disabled), .vw-btn-outline:active:not(:disabled) {
+  background: var(--vw-surface-active);
 }
 
 .vw-btn-ghost {
   background: transparent;
   color: var(--vw-text-muted);
 }
-.vw-btn-ghost:hover {
+.vw-btn-ghost:hover:not(:disabled) {
   background: var(--vw-surface-hover);
-  color: var(--vw-text);
+  color: var(--vw-gray-800);
+}
+.vw-btn-ghost:active:not(:disabled) {
+  background: var(--vw-surface-active);
 }
 
 .vw-btn-danger {
   background: var(--vw-danger);
-  color: #fff;
+  color: #ffffff;
+  border-color: var(--vw-danger);
 }
-.vw-btn-danger:hover { opacity: 0.85; }
+.vw-btn-danger:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.vw-btn-success {
+  background: var(--vw-success);
+  color: #ffffff;
+  border-color: var(--vw-success);
+}
+.vw-btn-success:hover:not(:disabled) {
+  opacity: 0.85;
+}
 
 .vw-icon-btn {
-  padding: 0;
-  width: 36px;
-  height: 36px;
+  padding: 6px;
   border-radius: var(--vw-radius-sm);
-  display: grid;
-  place-items: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: transparent;
   color: var(--vw-text-muted);
   border: 1px solid transparent;
   cursor: pointer;
-  transition: var(--vw-transition-fast);
+  transition: background var(--vw-transition-fast), color var(--vw-transition-fast), border-color var(--vw-transition-fast);
+  outline: none;
+}
+.vw-icon-btn svg {
+  width: 18px;
+  height: 18px;
 }
 .vw-icon-btn:hover {
   background: var(--vw-surface-hover);
-  color: var(--vw-text);
+  color: var(--vw-gray-800);
+}
+.vw-icon-btn:active {
+  background: var(--vw-surface-active);
+}
+.vw-icon-btn:focus-visible {
+  box-shadow: var(--vw-focus-ring);
 }
 
-/* Cards */
+/* 3. Cards & Containers */
 .vw-card {
   background: var(--vw-surface);
   border: 1px solid var(--vw-border);
   border-radius: var(--vw-radius-md);
-  padding: var(--vw-space-5);
+  padding: var(--vw-space-4);
+  box-shadow: var(--vw-shadow-sm);
+  display: flex;
+  flex-direction: column;
 }
 
 .vw-metric-card {
@@ -92,36 +213,107 @@
   border: 1px solid var(--vw-border);
   border-radius: var(--vw-radius-md);
   padding: var(--vw-space-4);
+  transition: border-color var(--vw-transition-fast), box-shadow var(--vw-transition-fast);
+  box-shadow: var(--vw-shadow-sm);
+  display: flex;
+  flex-direction: column;
 }
-.vw-metric-label { font-size: 13px; color: var(--vw-text-muted); }
-.vw-metric-value { font-size: 28px; font-weight: 600; margin-top: var(--vw-space-2); color: var(--vw-text); }
+.vw-metric-card:hover {
+  border-color: var(--vw-gray-800);
+}
+.vw-metric-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--vw-gray-800);
+}
+.vw-metric-value {
+  font-size: 28px;
+  font-weight: 600;
+  margin-top: 4px;
+  color: var(--vw-gray-800);
+  letter-spacing: -0.02em;
+}
 
-/* Forms */
+/* Quick Actions List */
+.vw-quick-action {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--vw-space-3);
+  padding: 12px 16px;
+  background: var(--vw-surface);
+  text-decoration: none;
+  color: var(--vw-gray-800);
+  font-weight: 500;
+  font-size: 14px;
+  transition: background var(--vw-transition-fast);
+  border-bottom: 1px solid var(--vw-border);
+}
+.vw-quick-action:last-child {
+  border-bottom: none;
+}
+.vw-quick-action:hover {
+  background: var(--vw-surface-hover) !important;
+}
+.vw-quick-action svg {
+  width: 18px;
+  height: 18px;
+  color: var(--vw-text-muted);
+}
+.vw-quick-action:hover svg {
+  color: var(--vw-gray-800);
+}
+
+/* 4. Forms & Controls */
 .vw-field {
   display: grid;
   gap: var(--vw-space-2);
+  margin-bottom: var(--vw-space-4);
 }
 .vw-label {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
-  color: var(--vw-text-muted);
+  color: var(--vw-gray-800);
 }
 .vw-input, .vw-select, .vw-textarea {
   width: 100%;
-  min-height: 42px;
   background: var(--vw-bg);
   border: 1px solid var(--vw-border);
   border-radius: var(--vw-radius-sm);
   padding: 10px 14px;
-  color: var(--vw-text);
+  color: var(--vw-gray-800);
   font-family: var(--vw-font-sans);
-  font-size: 14px;
+  font-size: 15px;
   outline: none;
-  transition: var(--vw-transition-fast);
+  transition: border-color var(--vw-transition-fast);
 }
-.vw-textarea { resize: vertical; min-height: 100px; }
+.vw-input::placeholder, .vw-textarea::placeholder {
+  color: var(--vw-text-muted);
+}
+.vw-textarea {
+  resize: vertical;
+  min-height: 100px;
+  line-height: 1.5;
+}
 .vw-input:focus, .vw-select:focus, .vw-textarea:focus {
-  border-color: var(--vw-accent);
+  border-color: var(--vw-gray-800);
+}
+.vw-input:disabled, .vw-select:disabled, .vw-textarea:disabled,
+.vw-input[readonly], .vw-textarea[readonly] {
+  background: var(--vw-surface-active);
+  color: var(--vw-text-muted);
+  cursor: not-allowed;
+  border-color: var(--vw-border);
+}
+
+/* Dropdown styling */
+.vw-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23888888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 16px;
+  padding-right: 40px;
 }
 
 /* Search Box */
@@ -129,48 +321,110 @@
   position: relative;
   display: flex;
   align-items: center;
-  width: min(360px, 100%);
+  width: 100%;
 }
 .vw-search svg {
   position: absolute;
-  left: 12px;
+  left: 14px;
   color: var(--vw-text-muted);
   width: 16px;
   height: 16px;
 }
 .vw-search input {
-  padding-left: 36px;
+  padding-left: 40px;
 }
 
-/* Badges */
+/* Switch Component */
+.switch {
+  position: relative;
+  width: 40px;
+  height: 24px;
+  border: 1px solid var(--vw-border);
+  border-radius: var(--vw-radius-full);
+  background: var(--vw-surface-hover);
+  cursor: pointer;
+  padding: 0;
+  display: inline-block;
+  outline: none;
+  transition: background var(--vw-transition-fast), border-color var(--vw-transition-fast);
+}
+.switch::after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  left: 2px;
+  top: 2px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid var(--vw-border);
+  transition: transform 150ms ease, background var(--vw-transition-fast);
+}
+.switch.on {
+  background: var(--vw-success);
+  border-color: var(--vw-success);
+}
+.switch.on::after {
+  transform: translateX(16px);
+  border-color: transparent;
+}
+.switch:focus-visible {
+  box-shadow: var(--vw-focus-ring);
+}
+
+/* Checkbox Style */
+.vw-checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--vw-primary);
+  cursor: pointer;
+}
+
+/* 5. Badges */
 .vw-badge {
   display: inline-flex;
   align-items: center;
-  padding: 2px 8px;
+  padding: 4px 10px;
   border-radius: var(--vw-radius-full);
   font-size: 12px;
   font-weight: 500;
-  background: var(--vw-surface-hover);
+  line-height: 1.2;
+  background: var(--vw-gray-100);
   color: var(--vw-text-muted);
 }
-.vw-badge-success { background: var(--vw-success-bg); color: var(--vw-success); }
-.vw-badge-warning { background: var(--vw-warning-bg); color: var(--vw-warning); }
-.vw-badge-danger { background: var(--vw-danger-bg); color: var(--vw-danger); }
+.vw-badge-success {
+  background: var(--vw-success-bg);
+  color: var(--vw-success);
+}
+.vw-badge-warning {
+  background: var(--vw-warning-bg);
+  color: var(--vw-warning);
+}
+.vw-badge-danger {
+  background: var(--vw-danger-bg);
+  color: var(--vw-danger);
+}
+.vw-badge-info {
+  background: var(--vw-info-bg);
+  color: var(--vw-info);
+}
 
 /* Avatar */
 .vw-avatar {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background: var(--vw-accent);
-  color: var(--vw-accent-text);
+  background: var(--vw-surface-hover);
+  color: var(--vw-gray-800);
   display: grid;
   place-items: center;
   font-weight: 600;
   font-size: 14px;
+  user-select: none;
+  border: 1px solid var(--vw-border);
 }
 
-/* Tables */
+/* 6. Tables */
 .vw-table-container {
   width: 100%;
   overflow-x: auto;
@@ -181,236 +435,378 @@
 .vw-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 760px;
+  min-width: 800px;
 }
 .vw-table th, .vw-table td {
   text-align: left;
-  padding: var(--vw-space-3) var(--vw-space-4);
+  padding: 12px 16px;
   border-bottom: 1px solid var(--vw-border);
   font-size: 14px;
 }
 .vw-table th {
-  background: var(--vw-bg);
+  background: var(--vw-surface-hover);
   color: var(--vw-text-muted);
   font-weight: 500;
+  font-size: 13px;
 }
-.vw-table tr:last-child td { border-bottom: none; }
+.vw-table tr {
+  transition: background var(--vw-transition-fast);
+}
+.vw-table tr:hover:not(.vw-table-no-hover) {
+  background: var(--vw-surface-hover);
+}
+.vw-table tr:last-child td {
+  border-bottom: none;
+}
 
-/* Empty States */
+/* 7. Empty States & Feedback */
 .vw-empty {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: var(--vw-space-8) var(--vw-space-4);
+  padding: 64px 32px;
   border: 1px dashed var(--vw-border);
   border-radius: var(--vw-radius-md);
+  background: var(--vw-surface);
 }
 .vw-empty-icon {
-  color: var(--vw-text-subtle);
-  margin-bottom: var(--vw-space-3);
+  color: var(--vw-text-muted);
+  margin-bottom: var(--vw-space-4);
   width: 48px;
   height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.vw-empty-icon svg {
+  width: 100%;
+  height: 100%;
 }
 .vw-empty-title {
-  color: var(--vw-text);
+  color: var(--vw-gray-800);
   font-weight: 600;
-  font-size: 16px;
-  margin-bottom: var(--vw-space-2);
+  font-size: 18px;
+  margin: 0 0 var(--vw-space-2);
 }
 .vw-empty-desc {
-  color: var(--vw-text-muted);
-  font-size: 14px;
-  max-width: 400px;
+  color: var(--vw-text);
+  font-size: 15px;
+  max-width: 440px;
+  margin: 0 0 var(--vw-space-5);
+  line-height: 1.6;
 }
 
-/* Modal */
+/* 8. Modals */
 .vw-modal-backdrop {
   position: fixed;
   inset: 0;
   z-index: var(--vw-z-modal);
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
   display: grid;
   place-items: center;
   padding: var(--vw-space-4);
+  animation: fadeIn var(--vw-transition-fast) forwards;
 }
 .vw-modal {
   width: 100%;
   max-width: 520px;
-  background: var(--vw-surface);
+  background: var(--vw-surface-elevated);
   border: 1px solid var(--vw-border);
-  border-radius: var(--vw-radius-md);
+  border-radius: var(--vw-radius-lg);
   box-shadow: var(--vw-shadow-lg);
   display: flex;
   flex-direction: column;
+  animation: modalScaleUp var(--vw-transition-base) forwards;
+  overflow: hidden;
 }
+@keyframes modalScaleUp {
+  from { opacity: 0; transform: scale(0.96) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
 .vw-modal-header {
-  padding: var(--vw-space-4);
+  padding: var(--vw-space-4) var(--vw-space-5);
   border-bottom: 1px solid var(--vw-border);
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 .vw-modal-body {
-  padding: var(--vw-space-4);
-  max-height: 70vh;
+  padding: var(--vw-space-5);
+  max-height: 65vh;
   overflow-y: auto;
 }
 .vw-modal-footer {
-  padding: var(--vw-space-4);
+  padding: var(--vw-space-4) var(--vw-space-5);
   border-top: 1px solid var(--vw-border);
   display: flex;
   justify-content: flex-end;
-  gap: var(--vw-space-2);
+  gap: var(--vw-space-3);
+  background: var(--vw-surface-hover);
 }
 
-/* Command Palette */
+/* 9. Command Palette */
 .vw-cmd-palette {
   position: fixed;
   inset: 0;
   z-index: var(--vw-z-modal);
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
   display: none;
   align-items: flex-start;
   justify-content: center;
-  padding-top: 10vh;
+  padding-top: 12vh;
+  padding-left: var(--vw-space-4);
+  padding-right: var(--vw-space-4);
 }
-.vw-cmd-palette.open { display: flex; }
+.vw-cmd-palette.open {
+  display: flex;
+  animation: fadeIn var(--vw-transition-fast) forwards;
+}
 .vw-cmd-dialog {
   width: 100%;
   max-width: 600px;
-  background: var(--vw-surface);
+  background: var(--vw-surface-elevated);
   border: 1px solid var(--vw-border);
-  border-radius: var(--vw-radius-md);
+  border-radius: var(--vw-radius-lg);
   box-shadow: var(--vw-shadow-lg);
   overflow: hidden;
+  animation: modalScaleUp var(--vw-transition-base) forwards;
 }
 .vw-cmd-input {
   width: 100%;
   background: transparent;
   border: none;
   padding: 16px 20px;
-  font-size: 18px;
-  color: var(--vw-text);
+  font-size: 16px;
+  color: var(--vw-gray-800);
   outline: none;
   border-bottom: 1px solid var(--vw-border);
+  font-family: var(--vw-font-sans);
+}
+.vw-cmd-input::placeholder {
+  color: var(--vw-text-muted);
 }
 .vw-cmd-results {
-  max-height: 300px;
+  max-height: 360px;
   overflow-y: auto;
-  padding: 8px 0;
+  padding: 8px;
 }
 .vw-cmd-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 20px;
-  color: var(--vw-text-muted);
+  padding: 12px 16px;
+  color: var(--vw-text);
   cursor: pointer;
+  border-radius: var(--vw-radius-sm);
+  font-size: 14px;
+  transition: background var(--vw-transition-fast), color var(--vw-transition-fast);
+}
+.vw-cmd-item svg {
+  width: 18px;
+  height: 18px;
+  color: var(--vw-text-muted);
+  flex-shrink: 0;
 }
 .vw-cmd-item:hover, .vw-cmd-item.selected {
   background: var(--vw-surface-hover);
-  color: var(--vw-text);
+  color: var(--vw-gray-800);
+}
+.vw-cmd-item:hover svg, .vw-cmd-item.selected svg {
+  color: var(--vw-gray-800);
 }
 
-/* Switch Component */
-.switch {
-  position: relative;
-  width: 42px;
-  height: 24px;
-  border: 1px solid var(--vw-border);
-  border-radius: var(--vw-radius-full);
-  background: var(--vw-bg);
-  cursor: pointer;
-  padding: 0;
-  display: inline-block;
-  outline: none;
-  transition: var(--vw-transition-fast);
-}
-.switch::after {
-  content: "";
-  position: absolute;
-  width: 18px;
-  height: 18px;
-  left: 2px;
-  top: 2px;
-  border-radius: 50%;
-  background: var(--vw-text-muted);
-  transition: transform 0.15s ease, background 0.15s ease;
-}
-.switch.on {
-  background: var(--vw-success-bg);
-  border-color: var(--vw-success);
-}
-.switch.on::after {
-  transform: translateX(18px);
-  background: var(--vw-success);
-}
-
-/* Toast Component */
+/* 10. Toast Notifications Stack */
 .toast-root {
   position: fixed;
   right: 24px;
   bottom: 24px;
-  display: grid;
-  gap: var(--vw-space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--vw-space-3);
   z-index: var(--vw-z-toast);
+  max-width: 400px;
+  width: calc(100vw - 48px);
+  pointer-events: none;
 }
 .toast {
-  background: var(--vw-surface);
+  pointer-events: auto;
+  background: var(--vw-surface-elevated);
   border: 1px solid var(--vw-border);
-  border-radius: var(--vw-radius-sm);
+  border-radius: var(--vw-radius-md);
   box-shadow: var(--vw-shadow-md);
-  padding: var(--vw-space-3) var(--vw-space-4);
+  padding: 16px 20px;
   color: var(--vw-text);
-  min-width: 240px;
   font-family: var(--vw-font-sans);
   font-size: 14px;
-  transition: opacity 0.18s ease;
+  line-height: 1.5;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  animation: toastSlideIn var(--vw-transition-base) forwards;
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+.toast svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.toast-info svg { color: var(--vw-info); }
+.toast-success svg { color: var(--vw-success); }
+.toast-warning svg { color: var(--vw-warning); }
+.toast-error svg { color: var(--vw-danger); }
+
+@keyframes toastSlideIn {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
-/* Login Screen */
-.login-screen {
+/* 11. Tab Components */
+.vw-tabs {
+  display: flex;
+  gap: var(--vw-space-6);
+  border-bottom: 1px solid var(--vw-border);
+}
+.vw-tab {
+  background: none;
+  border: none;
+  padding: var(--vw-space-3) 0;
+  cursor: pointer;
+  color: var(--vw-text-muted);
+  font-weight: 500;
+  font-size: 14px;
+  border-bottom: 2px solid transparent;
+  transition: color var(--vw-transition-fast), border-color var(--vw-transition-fast);
+  outline: none;
+  font-family: var(--vw-font-sans);
+}
+.vw-tab:hover {
+  color: var(--vw-gray-800);
+}
+.vw-tab.active {
+  color: var(--vw-gray-800);
+  border-bottom-color: var(--vw-gray-800);
+}
+.vw-tab:focus-visible {
+  box-shadow: var(--vw-focus-ring);
+}
+/* ============================================
+   13. Unified Dropdown
+   ============================================ */
+
+.vw-dropdown {
+  position: absolute;
+  background: var(--vw-surface-elevated);
+  border: 1px solid var(--vw-border);
+  border-radius: var(--vw-radius-md);
+  box-shadow: var(--vw-shadow-lg);
+  z-index: var(--vw-z-dropdown);
+  padding: var(--vw-space-1);
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--vw-transition-fast), transform var(--vw-transition-fast), visibility var(--vw-transition-fast);
+}
+
+.vw-dropdown.open-down {
+  top: calc(100% + var(--vw-space-2));
+  transform: translateY(-4px);
+  transform-origin: top right;
+}
+
+.vw-dropdown.open-up {
+  bottom: calc(100% + var(--vw-space-2));
+  transform: translateY(4px);
+  transform-origin: bottom left;
+}
+
+.vw-dropdown.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.vw-dropdown-header {
+  padding: var(--vw-space-2) var(--vw-space-3);
+  border-bottom: 1px solid var(--vw-border);
+  margin-bottom: var(--vw-space-1);
+  text-align: left;
+}
+
+.vw-dropdown-title {
+  font-weight: 600;
+  color: var(--vw-gray-800);
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vw-dropdown-subtitle {
+  font-size: 11px;
+  color: var(--vw-text-muted);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vw-dropdown-divider {
+  height: 1px;
+  background: var(--vw-border);
+  margin: var(--vw-space-1) 0;
+}
+
+.vw-dropdown-item {
   display: flex;
   align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  background: var(--vw-bg);
-  padding: var(--vw-space-4);
-}
-.login-card {
+  justify-content: flex-start;
+  gap: var(--vw-space-2);
+  min-height: 32px;
+  padding: 0 var(--vw-space-2);
+  font-size: 13px;
+  font-weight: 400;
   width: 100%;
-  max-width: 400px;
-  background: var(--vw-surface);
-  border: 1px solid var(--vw-border);
-  border-radius: var(--vw-radius-lg);
-  padding: var(--vw-space-6);
-  box-shadow: var(--vw-shadow-lg);
-  text-align: center;
-}
-.login-card h1 {
-  font-size: 24px;
-  font-weight: 600;
-  margin: var(--vw-space-4) 0 var(--vw-space-2);
+  border-radius: var(--vw-radius-sm);
+  border: none;
+  background: transparent;
   color: var(--vw-text);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background var(--vw-transition-fast), color var(--vw-transition-fast);
+  outline: none;
 }
-.login-card p {
-  color: var(--vw-text-muted);
-  font-size: 14px;
-  line-height: 1.5;
-  margin-bottom: var(--vw-space-5);
-  margin-top: 0;
+
+.vw-dropdown-item:hover,
+.vw-dropdown-item:focus-visible {
+  background: var(--vw-surface-hover);
+  color: var(--vw-gray-800);
 }
-.brand-mark {
-  width: 48px;
-  height: 48px;
-  background: var(--vw-accent);
-  color: var(--vw-accent-text);
-  border-radius: var(--vw-radius-md);
-  font-size: 24px;
-  font-weight: 800;
-  display: grid;
-  place-items: center;
-  margin: 0 auto;
+
+.vw-dropdown-item.active {
+  background: var(--vw-surface-active);
+  color: var(--vw-gray-800);
+  font-weight: 500;
 }
+
+.vw-dropdown-item.danger {
+  color: var(--vw-danger);
+}
+
+.vw-dropdown-item.danger:hover {
+  background: var(--vw-danger-bg);
+}
+
+.vw-dropdown-item svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+

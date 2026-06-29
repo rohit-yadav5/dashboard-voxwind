@@ -122,10 +122,10 @@ export function editToolPage() {
 
         try {
           await updateTool(currentTool.id, parsed);
-          toast("Tool draft updated successfully");
+          toast("Tool draft updated successfully", "success");
           navigate("/dashboard/tools");
         } catch (err) {
-          toast(err.message || "Failed to update tool draft");
+          toast(err.message || "Failed to update tool draft", "error");
         }
       });
 

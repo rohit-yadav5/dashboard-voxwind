@@ -21,7 +21,28 @@ export const icons = {
   Menu: `${svgBase}<line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>`,
   Close: `${svgBase}<path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>`,
   Command: `${svgBase}<path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3"/></svg>`,
-  Check: `${svgBase}<polyline points="20 6 9 17 4 12"/></svg>`
+  Check: `${svgBase}<polyline points="20 6 9 17 4 12"/></svg>`,
+  ChevronUp: `${svgBase}<path d="m18 15-6-6-6 6"/></svg>`,
+  ChevronsUpDown: `${svgBase}<path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg>`,
+  User: `${svgBase}<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+  LogOut: `${svgBase}<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>`,
+  ChevronDown: `${svgBase}<path d="m6 9 6 6 6-6"/></svg>`,
+  Cloud: `${svgBase}<path d="M17.5 19A5.5 5.5 0 0 0 22 13.5a5.5 5.5 0 0 0-5.5-5.5H16a7 7 0 1 0-11.95 5.05A5 5 0 0 0 5 22h12.5Z"/></svg>`,
+  AlertCircle: `${svgBase}<circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>`,
+  Plus: `${svgBase}<path d="M5 12h14"/><path d="M12 5v14"/></svg>`,
+  RefreshCw: `${svgBase}<path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>`,
+  ExternalLink: `${svgBase}<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>`,
+  Info: `${svgBase}<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>`,
+  ShieldAlert: `${svgBase}<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>`,
+  Trash: `${svgBase}<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>`,
+  Copy: `${svgBase}<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`,
+  Activity: `${svgBase}<path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>`,
+  Box: `${svgBase}<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>`,
+  Database: `${svgBase}<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>`,
+  Server: `${svgBase}<rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>`,
+  Clock: `${svgBase}<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+  MoreHorizontal: `${svgBase}<circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>`,
+  ChevronRight: `${svgBase}<path d="m9 18 6-6-6-6"/></svg>`
 };
 
 export function getIcon(name) {

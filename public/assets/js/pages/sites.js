@@ -27,7 +27,10 @@ export function sitesPage() {
       });
     }
 
-    const filtered = sites.filter(s => s.name.toLowerCase().includes(searchTerm.toLowerCase()));
+    const filtered = sites.filter(s => 
+      s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (s.display_name && s.display_name.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
 
     if (filtered.length === 0) {
       if (searchTerm) {
@@ -49,25 +52,44 @@ export function sitesPage() {
       const toneMap = { active: 'success', maintenance: 'warning', archived: 'default', draft: 'default' };
       const tone = toneMap[site.status] || 'default';
       const badgeHtml = Badge({ label: site.status, tone });
-      const avatarHtml = `<div class="vw-avatar" style="background: var(--vw-primary); color: white;">${site.name.charAt(0).toUpperCase()}</div>`;
+      const avatarHtml = `<div class="vw-avatar" style="width: 32px; height: 32px; font-size: 14px; background: var(--vw-surface-hover); color: var(--vw-gray-800); border: 1px solid var(--vw-border); border-radius: 6px; font-weight: 600;">${site.name.charAt(0).toUpperCase()}</div>`;
       
       return `
-        <div class="vw-card" style="cursor: pointer; transition: transform 0.2s ease, border-color 0.2s ease;" data-site-id="${site.id}" class="site-card">
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--vw-space-4);">
-            ${avatarHtml}
-            ${badgeHtml}
+        <div class="vw-card site-card" style="cursor: pointer; padding: 16px; transition: border-color var(--vw-transition-fast), box-shadow var(--vw-transition-fast); display: flex; flex-direction: column; justify-content: space-between;" data-site-id="${site.id}">
+          <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 12px; overflow: hidden;">
+              ${avatarHtml}
+              <div style="min-width: 0; overflow: hidden;">
+                <h3 class="vw-h3" style="margin: 0 0 2px 0; font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${site.display_name || site.name}</h3>
+                <p class="vw-text-muted" style="margin: 0; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${site.primary_domain || 'No primary domain'}</p>
+              </div>
+            </div>
+            <div style="flex-shrink: 0; margin-left: 8px;">
+              ${badgeHtml}
+            </div>
           </div>
-          <h3 class="vw-h3" style="margin-bottom: var(--vw-space-2);">${site.display_name || site.name}</h3>
-          <p class="vw-text-muted" style="margin-bottom: var(--vw-space-4); font-size: 13px;">${site.primary_domain || 'No primary domain'}</p>
-          <div style="display: flex; gap: var(--vw-space-3); border-top: 1px solid var(--vw-border); padding-top: var(--vw-space-3);">
-            <button class="vw-btn vw-btn-secondary switch-site-btn" data-id="${site.id}" style="flex: 1; justify-content: center;">Enter Workspace</button>
+          
+          <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--vw-text-muted);">
+              ${getIcon("Server")} <span style="font-weight: 500; color: var(--vw-text);">Edge Network</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--vw-text-muted);">
+              ${getIcon("Clock")} <span>Synced 2 mins ago</span>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: var(--vw-space-2); border-top: 1px solid var(--vw-border); padding-top: 12px; margin-top: auto;">
+            <button class="vw-btn vw-btn-ghost switch-site-btn" data-id="${site.id}" style="flex: 1; justify-content: center; background: var(--vw-surface-hover); min-height: 28px; height: 28px; font-size: 12px; padding: 0 8px;">Enter Workspace</button>
+            <button class="vw-icon-btn" style="border: 1px solid var(--vw-border); border-radius: 6px; padding: 0; width: 28px; height: 28px;">
+              ${getIcon("MoreHorizontal")}
+            </button>
           </div>
         </div>
       `;
     }).join('');
 
     return `
-      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--vw-space-4); margin-top: var(--vw-space-5);">
+      <div class="vw-grid-auto" style="margin-top: var(--vw-space-5);">
         ${gridHtml}
       </div>
     `;
@@ -94,20 +116,22 @@ export function sitesPage() {
       });
 
       return `
-        ${PageHeader({
-          title: "Sites",
-          subtitle: "Manage your workspaces, APIs, and background workers.",
-          actions: Button({ label: "Create Site", href: "/dashboard/sites/new", icon: "Plus" })
-        })}
-        
-        <div style="display: flex; gap: var(--vw-space-3); margin-top: var(--vw-space-5); align-items: center;">
-          <div style="width: 320px;">
-            ${SearchInput({ id: "site-search", placeholder: "Search sites by name..." })}
+        <div class="vw-page">
+          ${PageHeader({
+            title: "Sites",
+            subtitle: "Manage your workspaces, APIs, and background workers.",
+            actions: Button({ label: "Create Site", href: "/dashboard/sites/new", icon: "Plus" })
+          })}
+          
+          <div style="display: flex; gap: var(--vw-space-3); margin-top: var(--vw-space-5); align-items: center;">
+            <div style="width: 320px; max-width: 100%;">
+              ${SearchInput({ id: "site-search", placeholder: "Search sites by name..." })}
+            </div>
           </div>
-        </div>
 
-        <div id="sites-content">
-          ${renderContent()}
+          <div id="sites-content">
+            ${renderContent()}
+          </div>
         </div>
       `;
     },
@@ -119,12 +143,20 @@ export function sitesPage() {
 
       document.getElementById("sites-content")?.addEventListener("click", (e) => {
         const switchBtn = e.target.closest(".switch-site-btn");
+        const card = e.target.closest(".site-card");
+        
+        let siteId = null;
         if (switchBtn) {
-          const siteId = switchBtn.getAttribute("data-id");
+          siteId = switchBtn.getAttribute("data-id");
+        } else if (card) {
+          siteId = card.getAttribute("data-site-id");
+        }
+        
+        if (siteId) {
           const site = sites.find(s => s.id === siteId);
           if (site) {
             setActiveSite(site);
-            navigate("/dashboard");
+            navigate("/dashboard/sites/" + site.id);
           }
         }
 

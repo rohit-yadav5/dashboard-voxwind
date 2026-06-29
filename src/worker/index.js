@@ -100,13 +100,18 @@ export default {
 
 function corsHeaders(request, env) {
   const origin = request.headers.get("Origin");
-  const allowed = env.DASHBOARD_ORIGIN || "https://dashboard.voxwind.com";
   const headers = {
     "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
     "Access-Control-Allow-Credentials": "true",
     "Access-Control-Max-Age": "86400"
   };
-  if (origin === allowed) headers["Access-Control-Allow-Origin"] = origin;
+  if (origin) {
+    const allowed = env.DASHBOARD_ORIGIN || "https://dashboard.voxwind.com";
+    const isDev = env.APP_ENV === "development" && (origin.startsWith("http://localhost:") || origin.startsWith("http://127.0.0.1:"));
+    if (origin === allowed || isDev) {
+      headers["Access-Control-Allow-Origin"] = origin;
+    }
+  }
   return headers;
 }

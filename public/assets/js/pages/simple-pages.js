@@ -117,10 +117,11 @@ async function handlePublishAction() {
 
 export function usersPage() {
   let searchTerm = "";
+  let cachedUsers = [];
   
   return {
     render: async () => {
-      const allUsers = await listUsers();
+      cachedUsers = await listUsers();
       
       const renderRows = (filteredUsers) => {
         if (filteredUsers.length === 0) {
@@ -136,7 +137,7 @@ export function usersPage() {
         `).join("");
       };
 
-      const filtered = allUsers.filter(user => 
+      const filtered = cachedUsers.filter(user => 
         user.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
         user.email.toLowerCase().includes(searchTerm.toLowerCase()) || 
         user.role.toLowerCase().includes(searchTerm.toLowerCase())
@@ -177,10 +178,9 @@ export function usersPage() {
     afterRender: () => {
       const searchEl = document.getElementById("user-search");
       if (searchEl) {
-        searchEl.addEventListener("input", async (e) => {
+        searchEl.addEventListener("input", (e) => {
           searchTerm = e.target.value;
-          const allUsers = await listUsers();
-          const filtered = allUsers.filter(user => 
+          const filtered = cachedUsers.filter(user => 
             user.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
             user.email.toLowerCase().includes(searchTerm.toLowerCase()) || 
             user.role.toLowerCase().includes(searchTerm.toLowerCase())
@@ -756,7 +756,7 @@ export function seoPage() {
   });
 }
 
-// Settings Page with lightweight Config Version logs
+// Settings Page with Platform Architecture and mock forms
 export function settingsPage() {
   return {
     render: async () => {
@@ -764,23 +764,88 @@ export function settingsPage() {
       return `
         <div class="vw-page">
         ${PageHeader({
-          title: "Settings",
-          subtitle: "Cloudflare-native runtime configuration planning surface."
+          title: "Platform Settings",
+          subtitle: "Configure global platform routing, security, and infrastructure.",
+          actions: Button({ label: "Save Changes", variant: "primary", extraAttrs: 'id="save-settings-btn"' })
         })}
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--vw-space-4); margin-bottom: var(--vw-space-5);">
-          ${section("Public config flow", "D1 remains the source of truth. KV serves fast runtime snapshots.", `
-            <div class="timeline">
-              ${["Dashboard writes record", "Worker validates permissions", "D1 transaction stores draft", "Publish refreshes KV", "Public APIs read cached snapshot"].map((item) => `
-                <div class="timeline-item"><span class="timeline-dot"></span><div class="vw-text-muted vw-text-sm">${item}</div></div>
-              `).join("")}
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: var(--vw-space-4); margin-bottom: var(--vw-space-5);">
+          ${section("Platform Architecture", "Visual overview of how VoxWind services interact across the edge.", `
+            <div style="background: var(--vw-surface); border: 1px solid var(--vw-border); border-radius: var(--vw-radius-md); padding: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 280px;">
+              <svg width="100%" height="220" viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg" style="max-width: 400px;">
+                <!-- Dashboard -->
+                <rect x="200" y="10" width="100" height="40" rx="6" fill="var(--vw-primary)" />
+                <text x="250" y="35" font-family="var(--vw-font-sans)" font-size="14" fill="#ffffff" font-weight="600" text-anchor="middle">Dashboard</text>
+                
+                <!-- Auth -->
+                <rect x="50" y="100" width="100" height="40" rx="6" fill="var(--vw-success)" />
+                <text x="100" y="125" font-family="var(--vw-font-sans)" font-size="14" fill="#ffffff" font-weight="600" text-anchor="middle">Auth</text>
+                
+                <!-- API -->
+                <rect x="200" y="100" width="100" height="40" rx="6" fill="var(--vw-info)" />
+                <text x="250" y="125" font-family="var(--vw-font-sans)" font-size="14" fill="#ffffff" font-weight="600" text-anchor="middle">API Core</text>
+                
+                <!-- Flow -->
+                <rect x="350" y="100" width="100" height="40" rx="6" fill="var(--vw-warning)" />
+                <text x="400" y="125" font-family="var(--vw-font-sans)" font-size="14" fill="#ffffff" font-weight="600" text-anchor="middle">Flow Engine</text>
+                
+                <!-- Echo -->
+                <rect x="200" y="170" width="100" height="40" rx="6" fill="var(--vw-danger)" />
+                <text x="250" y="195" font-family="var(--vw-font-sans)" font-size="14" fill="#ffffff" font-weight="600" text-anchor="middle">Echo Worker</text>
+
+                <!-- D1/KV -->
+                <rect x="350" y="170" width="100" height="40" rx="6" fill="var(--vw-gray-800)" />
+                <text x="400" y="195" font-family="var(--vw-font-sans)" font-size="14" fill="#ffffff" font-weight="600" text-anchor="middle">D1 + KV</text>
+
+                <defs>
+                  <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--vw-gray-500)" />
+                  </marker>
+                </defs>
+
+                <!-- Connecting Lines -->
+                <path d="M250 50 L250 95" stroke="var(--vw-gray-500)" stroke-width="2" marker-end="url(#arrow)" />
+                <path d="M200 35 Q 100 35 100 95" stroke="var(--vw-gray-500)" stroke-width="2" marker-end="url(#arrow)" fill="none" />
+                <path d="M300 35 Q 400 35 400 95" stroke="var(--vw-gray-500)" stroke-width="2" marker-end="url(#arrow)" fill="none" />
+                <path d="M250 140 L250 165" stroke="var(--vw-gray-500)" stroke-width="2" marker-end="url(#arrow)" />
+                <path d="M300 120 L350 170" stroke="var(--vw-gray-500)" stroke-width="2" stroke-dasharray="4" marker-end="url(#arrow)" />
+              </svg>
             </div>
           `)}
-          ${section("Bindings prepared", "The Worker config is ready for future resources.", `
-            <p style="margin-top:0;"><strong>D1</strong><br><span class="vw-text-muted vw-text-sm">DB source of truth for admin data.</span></p>
-            <p><strong>KV</strong><br><span class="vw-text-muted vw-text-sm">CONFIG_CACHE and RATE_LIMIT namespaces.</span></p>
-            <p style="margin-bottom:0;"><strong>R2</strong><br><span class="vw-text-muted vw-text-sm">MEDIA_BUCKET for uploaded assets.</span></p>
+
+          ${section("Global Configuration", "Mock settings for routing and platform access.", `
+            <form id="settings-form" style="display: flex; flex-direction: column; gap: var(--vw-space-4);">
+              <div class="vw-field">
+                <label class="vw-label">Primary Admin Domain</label>
+                <input class="vw-input" type="text" value="dashboard.voxwind.com" readonly>
+                <span class="vw-text-muted vw-text-sm" style="margin-top: 4px; display: block;">Managed via Cloudflare Custom Domains.</span>
+              </div>
+              <div class="vw-field">
+                <label class="vw-label">Auth Origin</label>
+                <input class="vw-input" type="text" value="https://auth.voxwind.com" readonly>
+              </div>
+              <div class="vw-field" style="padding: 16px; border: 1px solid var(--vw-border); border-radius: var(--vw-radius-md); background: var(--vw-bg);">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <div>
+                    <h4 style="margin: 0 0 4px 0; font-size: 14px; font-weight: 500;">Maintenance Mode</h4>
+                    <span class="vw-text-muted vw-text-sm">Locks out non-owner users globally.</span>
+                  </div>
+                  ${switchEl(false, "Maintenance Mode")}
+                </div>
+              </div>
+              <div class="vw-field" style="padding: 16px; border: 1px solid var(--vw-border); border-radius: var(--vw-radius-md); background: var(--vw-bg);">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <div>
+                    <h4 style="margin: 0 0 4px 0; font-size: 14px; font-weight: 500;">Enforce 2FA</h4>
+                    <span class="vw-text-muted vw-text-sm">Require TOTP for all team members.</span>
+                  </div>
+                  ${switchEl(true, "Enforce 2FA")}
+                </div>
+              </div>
+            </form>
           `)}
         </div>
+        
         <div>
           ${section("Config Version Registry", "Lightweight metadata log of previous configurations published from the dashboard.", `
             <div class="vw-table-container">
@@ -812,7 +877,11 @@ export function settingsPage() {
         </div>
       `;
     },
-    afterRender: () => {}
+    afterRender: () => {
+      document.getElementById("save-settings-btn")?.addEventListener("click", () => {
+        import("../components/toast.js").then(({ toast }) => toast("Platform settings saving coming soon."));
+      });
+    }
   };
 }
 
